@@ -1,0 +1,13 @@
+{
+  "configurations": [
+    {
+      "name": ".NET Debug",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net8.0/App.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
