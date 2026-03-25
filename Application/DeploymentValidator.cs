@@ -1,7 +1,7 @@
-using App_deploy.Application.Ports;
-using App_deploy.Domain;
+using App.Application.Ports;
+using App.Domain;
 
-namespace App_deploy.Application;
+namespace App.Application;
 
 public sealed class DeploymentValidator : IDeploymentValidator
 {

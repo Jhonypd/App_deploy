@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace App_deploy.Api;
+namespace App.Api;
 
 public static class ApiAuth
 {

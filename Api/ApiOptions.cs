@@ -1,4 +1,4 @@
-namespace App_deploy.Api;
+namespace App.Api;
 
 public sealed class ApiOptions
 {

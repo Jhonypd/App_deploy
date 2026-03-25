@@ -1,8 +1,8 @@
-using App_deploy.Application.Ports;
-using App_deploy.Domain;
+using App.Application.Ports;
+using App.Domain;
 using Microsoft.Extensions.Configuration;
 
-namespace App_deploy.Infrastructure;
+namespace App.Infrastructure;
 
 public sealed class JsonAppConfigProvider : IAppConfigProvider
 {
@@ -14,5 +14,6 @@ public sealed class JsonAppConfigProvider : IAppConfigProvider
 			.Build();
 
 		return config.Get<AppConfigRoot>() ?? new AppConfigRoot();
+	
 	}
 }

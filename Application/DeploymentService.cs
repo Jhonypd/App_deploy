@@ -1,7 +1,7 @@
-using App_deploy.Application.Ports;
-using App_deploy.Domain;
+using App.Application.Ports;
+using App.Domain;
 
-namespace App_deploy.Application;
+namespace App.Application;
 
 public sealed class DeploymentService
 {
@@ -44,7 +44,7 @@ public sealed class DeploymentService
 		{
 			_validator.Validate(selected);
 			siteWasRunning = _siteController.StopSiteIfRunning(selected.NomeSite);
-			_deployer.DeployFromOrigins(selected.Origens, selected.Destino);
+			_deployer.DeployFromOrigins(selected.Origens, selected.Svn, selected.Destino);
 		}
 		finally
 		{

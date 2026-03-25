@@ -1,6 +1,6 @@
-using App_deploy.Domain;
+using App.Domain;
 
-namespace App_deploy.Application.Ports;
+namespace App.Application.Ports;
 
 public interface IAppConfigProvider
 {

@@ -1,7 +1,7 @@
-using App_deploy.Application.Ports;
+using App.Application.Ports;
 using Microsoft.Web.Administration;
 
-namespace App_deploy.Infrastructure;
+namespace App.Infrastructure;
 
 public sealed class IisSiteController : ISiteController
 {
@@ -31,7 +31,7 @@ public sealed class IisSiteController : ISiteController
 		{
 			Console.WriteLine("Site já estava parado.");
 		}
-
+		Console.WriteLine($"Site {site} foi parado.");
 		return wasRunning;
 	}
 
@@ -55,6 +55,8 @@ public sealed class IisSiteController : ISiteController
 			site.Start();
 			manager.CommitChanges();
 			WaitForSiteState(siteName, ObjectState.Started, timeout: TimeSpan.FromSeconds(30));
+
+			Console.WriteLine($"Site {site} iniciado novamente.");
 		}
 	}
 

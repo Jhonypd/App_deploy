@@ -1,4 +1,4 @@
-namespace App_deploy.Domain;
+namespace App.Domain;
 
 public sealed class AppConfigRoot
 {

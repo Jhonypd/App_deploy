@@ -1,4 +1,4 @@
-namespace App_deploy.Application.Ports;
+namespace App.Application.Ports;
 
 public interface ISiteController
 {
