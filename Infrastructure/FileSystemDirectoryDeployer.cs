@@ -17,12 +17,13 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
 
         try
         {
-            // Roda o update da svn se veio o caminho a ser feito o update
+            // Atualiza SVN uma única vez
             if (!string.IsNullOrWhiteSpace(svn))
             {
                 SvnHelper.RunUpdate(svn);
             }
 
+            // Copia todas as origens para o staging
             foreach (var origin in origins)
             {
                 StageOrigin(origin, stagingRoot, destinationLeaf);
@@ -31,7 +32,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             Console.WriteLine("Aplicando staging no destino...");
 
             var normalizedDestination = PrepareDestination(destinationRoot);
-            CopyDirectoryContents(stagingRoot, normalizedDestination, overwrite: true);
+            DirectoryHelper.CopyDirectoryContents(stagingRoot, normalizedDestination, overwrite: true);
         }
         finally
         {
@@ -39,6 +40,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             {
                 if (Directory.Exists(stagingRoot))
                 {
+                    DirectoryHelper.ClearDirectoryContents(stagingRoot);
                     Directory.Delete(stagingRoot, recursive: true);
                 }
             }
@@ -79,7 +81,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             throw new InvalidOperationException($"Destino não existe: {normalized}");
 
         Console.WriteLine($"Limpando destino antes de copiar: {normalized}");
-        ClearDirectoryContents(normalized);
+        DirectoryHelper.ClearDirectoryContents(normalized);
 
         return normalized;
     }
@@ -102,21 +104,6 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
         return string.IsNullOrWhiteSpace(lastSegment) || lastSegment.Length < 2;
     }
 
-    private static void ClearDirectoryContents(string directory)
-    {
-        foreach (var file in Directory.GetFiles(directory))
-        {
-            File.SetAttributes(file, FileAttributes.Normal);
-            File.Delete(file);
-        }
-
-        foreach (var dir in Directory.GetDirectories(directory))
-        {
-            Directory.Delete(dir, recursive: true);
-        }
-    }
-
-
     private static void StageOrigin(OrigensConfig origin, string stagingRoot, string destinationLeaf)
     {
         var originPath = origin.Path;
@@ -133,46 +120,31 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
 
         if (Directory.Exists(originPath))
         {
+            // Copia só o conteúdo interno da pasta
             if (origin.Conteudo)
             {
-                CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
+                DirectoryHelper.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
                 return;
             }
 
             var dirName = new DirectoryInfo(originPath).Name;
 
+            // fallback: se nome da origem = nome do destino, copia só conteúdo
             if (!string.IsNullOrWhiteSpace(destinationLeaf) &&
                 string.Equals(dirName, destinationLeaf, StringComparison.OrdinalIgnoreCase))
             {
-                CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
+                DirectoryHelper.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
                 return;
             }
 
+            // comportamento padrão: copia a pasta inteira
             var destDir = Path.Combine(stagingRoot, dirName);
             Directory.CreateDirectory(destDir);
 
-            CopyDirectoryContents(originPath, destDir, overwrite: true);
+            DirectoryHelper.CopyDirectoryContents(originPath, destDir, overwrite: true);
             return;
         }
 
         throw new FileNotFoundException($"Origem não encontrada: {originPath}");
-    }
-
-    private static void CopyDirectoryContents(string sourceDir, string destinationDir, bool overwrite)
-    {
-        foreach (var dir in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
-        {
-            var relative = Path.GetRelativePath(sourceDir, dir);
-            Directory.CreateDirectory(Path.Combine(destinationDir, relative));
-        }
-
-        foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
-        {
-            var relative = Path.GetRelativePath(sourceDir, file);
-            var destFile = Path.Combine(destinationDir, relative);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(destFile)!);
-            File.Copy(file, destFile, overwrite);
-        }
     }
 }
