@@ -1,0 +1,52 @@
+## Build / publish
+bin/
+obj/
+artifacts/
+TestResults/
+**/publish/
+*.dll
+*.exe
+*.pdb
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+## VS Code (opcional: ignore tudo ou só settings locais)
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## Logs
+*.log
+
+## OS files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## NuGet (normalmente não se versiona)
+*.nupkg
+*.snupkg
+packages/
+
+## Secrets / certificados / chaves
+*.pfx
+*.p12
+*.pem
+*.key
+*.snk
+
+## Config local (recomendado: manter appsettings.json “template” e ignorar os ambientes)
+appsettings.*.json
+!appsettings.json
