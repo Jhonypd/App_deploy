@@ -15,12 +15,12 @@ public static class ApiAuth
 
 		if (!request.Headers.TryGetValue(ApiKeyHeader, out var provided) || provided.Count == 0)
 		{
-			return Results.Unauthorized();
+			return Results.Problem($"Header '{ApiKeyHeader}' é obrigatório.", statusCode: StatusCodes.Status401Unauthorized);
 		}
 
 		if (!string.Equals(provided[0], options.ApiKey, StringComparison.Ordinal))
 		{
-			return Results.Unauthorized();
+			return Results.Problem("API key inválida.", statusCode: StatusCodes.Status401Unauthorized);
 		}
 
 		return null;

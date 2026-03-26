@@ -1,4 +1,5 @@
 using App.Application;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Api.Controllers;
@@ -36,16 +37,23 @@ public sealed class SitesController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(new { message = "O id é obrigatório." });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "O id Ã© obrigatÃ³rio.");
         }
 
         var selected = _deployments.FindById(id);
         if (selected is null)
         {
-            return NotFound(new { message = $"Não foi encontrado um serviço com o id {id}." });
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: $"NÃ£o foi encontrado um serviÃ§o com o id {id}.");
         }
 
         _deployments.Run(selected);
         return Ok(new { ok = true });
+    }
+
+    [HttpGet("Status")]
+    public IActionResult Status([FromServices] IisMonitorService monitor)
+    {
+        var status = monitor.GetStatus();
+        return Ok(status);
     }
 }
