@@ -14,7 +14,7 @@ public static class SwaggerConfig
         {
             o.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "App API",
+                Title = "App-deploy API",
                 Version = "v1"
             });
 
@@ -52,7 +52,7 @@ public static class SwaggerConfig
 
         app.UseSwaggerUI(o =>
         {
-            o.SwaggerEndpoint("/swagger/v1/swagger.json", "App API v1");
+            o.SwaggerEndpoint("/swagger/v1/swagger.json", "App-deploy API v1");
         });
 
         return app;

@@ -12,8 +12,8 @@
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "build",
-        "isDefault": true
-      }
+              "build",
+              "./App-deploy.csproj"
     }
   ]
 }

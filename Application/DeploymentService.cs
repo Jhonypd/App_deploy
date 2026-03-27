@@ -44,13 +44,33 @@ public sealed class DeploymentService
 		{
 			_validator.Validate(selected);
 			siteWasRunning = _siteController.StopSiteIfRunning(selected.NomeSite);
-			_deployer.DeployFromOrigins(selected.Origens, selected.Svn, selected.Destino);
+			DeployWithRetry(selected);
 		}
 		finally
 		{
 			if (siteWasRunning)
 			{
 				_siteController.StartSite(selected.NomeSite);
+			}
+		}
+	}
+
+	private void DeployWithRetry(DeploymentItem selected)
+	{
+		const int maxAttempts = 3;
+		var delay = TimeSpan.FromSeconds(3);
+
+		for (var attempt = 1; attempt <= maxAttempts; attempt++)
+		{
+			try
+			{
+				_deployer.DeployFromOrigins(selected.Origens, selected.Svn, selected.Destino);
+				return;
+			}
+			catch (Exception ex) when (attempt < maxAttempts && (ex is UnauthorizedAccessException || ex is IOException))
+			{
+				Console.WriteLine($"Falha no deploy (tentativa {attempt}/{maxAttempts}): {ex.Message}");
+				Thread.Sleep(delay);
 			}
 		}
 	}

@@ -34,7 +34,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Liberado",policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+            "http://192.168.0.224:7077",
+                "http://localhost:7077",
+                "http://127.0.0.1:5055",
+                "http://localhost:5055")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
