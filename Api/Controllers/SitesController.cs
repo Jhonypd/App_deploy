@@ -3,6 +3,7 @@ using App.Application.UseCases.GetIisStatus;
 using App.Application.UseCases.GetSvnCommits;
 using App.Application.UseCases.ListDeployments;
 using App.Application.UseCases.RunDeployment;
+using App.Application.UseCases.UpdateSvnRevision;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,17 +17,20 @@ public sealed class SitesController : ControllerBase
     private readonly ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> _runDeployment;
     private readonly IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> _svnCommits;
     private readonly IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> _iisStatus;
+    private readonly ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse> _svnUpdate;
 
     public SitesController(
         IQueryHandler<ListDeploymentsQuery, ListDeploymentsResponse> listDeployments,
         ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> runDeployment,
         IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> svnCommits,
-        IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> iisStatus)
+        IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> iisStatus,
+        ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse> svnUpdate)
     {
         _listDeployments = listDeployments;
         _runDeployment = runDeployment;
         _svnCommits = svnCommits;
         _iisStatus = iisStatus;
+        _svnUpdate = svnUpdate;
     }
 
     [HttpGet("Lista")]
@@ -45,7 +49,7 @@ public sealed class SitesController : ControllerBase
             })
             .ToList();
 
-        return Ok(list);
+        return ApiResponseFactory.Ok(HttpContext, list);
     }
 
     [HttpPost("Executar")]
@@ -53,16 +57,16 @@ public sealed class SitesController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "O id é obrigatório.");
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status400BadRequest, "O id é obrigatório.");
         }
 
-		var response = _runDeployment.Handle(new RunDeploymentCommand(id));
-		if (!response.Found)
-		{
-			return Problem(statusCode: StatusCodes.Status404NotFound, title: $"Não foi encontrado um serviço com o id {id}.");
-		}
+        var response = _runDeployment.Handle(new RunDeploymentCommand(id));
+        if (!response.Found)
+        {
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status404NotFound, $"Não foi encontrado um serviço com o id {id}.");
+        }
 
-		return Ok(new { ok = response.Started });
+        return ApiResponseFactory.Ok(HttpContext, new { ok = response.Started });
     }
 
     [HttpGet("SvnCommits")]
@@ -73,36 +77,65 @@ public sealed class SitesController : ControllerBase
         return SvnCommitsInternal(id, limit);
     }
 
+    [HttpPost("SvnUpdate")]
+    public IActionResult SvnUpdate(
+        [FromHeader(Name = "id")] string? id,
+        [FromHeader(Name = "revision")] long revision)
+    {
+        return SvnUpdateInternal(id, revision);
+    }
+
 
     private IActionResult SvnCommitsInternal(string? id, int limit)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "O id é obrigatório.");
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status400BadRequest, "O id é obrigatório.");
         }
 
         if (limit <= 0)
         {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "O limit deve ser maior que zero.");
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status400BadRequest, "O limit deve ser maior que zero.");
         }
 
-		var response = _svnCommits.Handle(new GetSvnCommitsQuery(id, limit));
-		if (!response.Found)
-		{
-			return Problem(statusCode: StatusCodes.Status404NotFound, title: $"Não foi encontrado um serviço com o id {id}.");
-		}
+        var response = _svnCommits.Handle(new GetSvnCommitsQuery(id, limit));
+        if (!response.Found)
+        {
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status404NotFound, $"Não foi encontrado um serviço com o id {id}.");
+        }
 
-		var commits = response.Items
-			.Select(c => new SvnCommitDto
-			{
-				Revision = c.Revision,
-				Author = c.Author,
-				Date = c.Date,
-				Message = c.Message
-			})
-			.ToList();
+        var commits = response.Items
+            .Select(c => new SvnCommitDto
+            {
+                Revision = c.Revision,
+                Author = c.Author,
+                Date = c.Date,
+                Message = c.Message
+            })
+            .ToList();
 
-		return Ok(commits);
+        return ApiResponseFactory.Ok(HttpContext, commits);
+    }
+
+    private IActionResult SvnUpdateInternal(string? id, long revision)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status400BadRequest, "O id é obrigatório.");
+        }
+
+        if (revision <= 0)
+        {
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status400BadRequest, "A revision deve ser maior que zero.");
+        }
+
+        var response = _svnUpdate.Handle(new UpdateSvnRevisionCommand(id, revision));
+        if (!response.Found)
+        {
+            return ApiResponseFactory.Error(HttpContext, StatusCodes.Status404NotFound, $"Não foi encontrado um serviço com o id {id}.");
+        }
+
+        return ApiResponseFactory.Ok(HttpContext, new { ok = response.Updated, id, revision, svn = response.SvnPath });
     }
 
     [HttpGet("Status")]
@@ -124,6 +157,6 @@ public sealed class SitesController : ControllerBase
             })
             .ToList();
 
-        return Ok(status);
+        return ApiResponseFactory.Ok(HttpContext, status);
     }
 }

@@ -10,19 +10,22 @@ public sealed class DeploymentService
 	private readonly IDirectoryDeployer _deployer;
 	private readonly ISiteController _siteController;
 	private readonly ISvnLogProvider _svnLog;
+	private readonly ISvnWorkingCopyUpdater _svnUpdater;
 
 	public DeploymentService(
 		IAppConfigProvider configProvider,
 		IDeploymentValidator validator,
 		IDirectoryDeployer deployer,
 		ISiteController siteController,
-		ISvnLogProvider svnLog)
+		ISvnLogProvider svnLog,
+		ISvnWorkingCopyUpdater svnUpdater)
 	{
 		_configProvider = configProvider;
 		_validator = validator;
 		_deployer = deployer;
 		_siteController = siteController;
 		_svnLog = svnLog;
+		_svnUpdater = svnUpdater;
 	}
 
 	public IReadOnlyList<DeploymentItem> ListDeployments()
@@ -71,6 +74,21 @@ public sealed class DeploymentService
 		}
 
 		return _svnLog.GetCommits(selected.Svn, limit);
+	}
+
+	public void UpdateSvnToRevision(DeploymentItem selected, long revision)
+	{
+		if (selected is null)
+		{
+			throw new ArgumentNullException(nameof(selected));
+		}
+
+		if (string.IsNullOrWhiteSpace(selected.Svn))
+		{
+			throw new InvalidOperationException("O item não possui um caminho SVN configurado.");
+		}
+
+		_svnUpdater.UpdateToRevision(selected.Svn, revision);
 	}
 
 	private void DeployWithRetry(DeploymentItem selected)

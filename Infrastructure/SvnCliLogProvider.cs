@@ -2,11 +2,19 @@ using System.Diagnostics;
 using System.Xml.Linq;
 using App.Application.Ports;
 using App.Domain;
+using Microsoft.Extensions.Configuration;
 
 namespace App.Infrastructure;
 
 public sealed class SvnCliLogProvider : ISvnLogProvider
 {
+	private readonly IConfiguration? _configuration;
+
+	public SvnCliLogProvider(IConfiguration? configuration = null)
+	{
+		_configuration = configuration;
+	}
+
 	public IReadOnlyList<SvnCommit> GetCommits(string workingCopyPathOrUrl, int limit)
 	{
 		if (string.IsNullOrWhiteSpace(workingCopyPathOrUrl))
@@ -44,10 +52,7 @@ public sealed class SvnCliLogProvider : ISvnLogProvider
 		}
 		catch (Exception ex)
 		{
-throw new InvalidOperationException(
-				"Não foi possível executar o comando 'svn'. Verifique se o Subversion CLI está instalado " +
-				"(ex.: TortoiseSVN) e se 'svn.exe' está disponível no PATH, ou em 'C:\\Program Files\\TortoiseSVN\\bin'.",
-				ex);
+			throw new InvalidOperationException(BuildSvnCliMissingMessage(svnExe), ex);
 		}
 
 		if (process is null)
@@ -87,6 +92,17 @@ throw new InvalidOperationException(
 		return ParseXml(stdout);
 	}
 
+	private static string BuildSvnCliMissingMessage(string attemptedExe)
+	{
+		return
+			$"Não foi possível executar o comando 'svn' (tentado: '{attemptedExe}'). " +
+			"Para buscar logs (svn log) é necessário o 'svn.exe' (Subversion CLI). " +
+			"O executável 'SubWCRevCOM.exe' do TortoiseSVN é para versionamento/substituição de revisão e NÃO fornece 'svn log'. " +
+			"Soluções: (1) instalar/ajustar o TortoiseSVN com os Command Line Client Tools (para ter svn.exe), " +
+			"(2) instalar SlikSVN/VisualSVN e garantir 'svn.exe' no PATH, " +
+			"ou (3) configurar 'Svn:ExePath' no appsettings.json apontando para o svn.exe.";
+	}
+
 	private static IReadOnlyList<SvnCommit> ParseXml(string xml)
 	{
 		var doc = XDocument.Parse(xml);
@@ -119,13 +135,19 @@ throw new InvalidOperationException(
 		return result;
 	}
 
-	private static string ResolveSvnExe()
+	private string ResolveSvnExe()
 	{
+		var configured = _configuration?["Svn:ExePath"];
+		if (!string.IsNullOrWhiteSpace(configured) && File.Exists(configured))
+		{
+			return configured;
+		}
+
 		// Caminhos comuns do TortoiseSVN
 		var candidates = new[]
 		{
-			@"C:\\Program Files\\TortoiseSVN\\bin\\svn.exe",
-			@"C:\\Program Files (x86)\\TortoiseSVN\\bin\\svn.exe"
+			@"C:\Program Files\TortoiseSVN\bin\svn.exe",
+			@"C:\Program Files (x86)\TortoiseSVN\bin\svn.exe"
 		};
 
 		foreach (var candidate in candidates)

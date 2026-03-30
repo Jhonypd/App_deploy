@@ -11,7 +11,8 @@ public static class DependencyInjection
 		services.AddSingleton<IAppConfigProvider, JsonAppConfigProvider>();
 		services.AddSingleton<IDirectoryDeployer, FileSystemDirectoryDeployer>();
 		services.AddSingleton<ISiteController, IisSiteController>();
-		services.AddSingleton<ISvnLogProvider, SvnCliLogProvider>();
+		services.AddSingleton<ISvnLogProvider, SharpSvnLogProvider>();
+		services.AddSingleton<ISvnWorkingCopyUpdater, SharpSvnWorkingCopyUpdater>();
 		services.AddSingleton<IIisStatusProvider, IisStatusProvider>();
 
 		return services;
