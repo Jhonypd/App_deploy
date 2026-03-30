@@ -11,6 +11,7 @@ public sealed class DeploymentService
 	private readonly ISiteController _siteController;
 	private readonly ISvnLogProvider _svnLog;
 	private readonly ISvnWorkingCopyUpdater _svnUpdater;
+	private readonly ISvnWorkingCopyInfoProvider _svnInfo;
 
 	public DeploymentService(
 		IAppConfigProvider configProvider,
@@ -18,7 +19,8 @@ public sealed class DeploymentService
 		IDirectoryDeployer deployer,
 		ISiteController siteController,
 		ISvnLogProvider svnLog,
-		ISvnWorkingCopyUpdater svnUpdater)
+		ISvnWorkingCopyUpdater svnUpdater,
+		ISvnWorkingCopyInfoProvider svnInfo)
 	{
 		_configProvider = configProvider;
 		_validator = validator;
@@ -26,6 +28,7 @@ public sealed class DeploymentService
 		_siteController = siteController;
 		_svnLog = svnLog;
 		_svnUpdater = svnUpdater;
+		_svnInfo = svnInfo;
 	}
 
 	public IReadOnlyList<DeploymentItem> ListDeployments()
@@ -89,6 +92,21 @@ public sealed class DeploymentService
 		}
 
 		_svnUpdater.UpdateToRevision(selected.Svn, revision);
+	}
+
+	public long GetSvnCurrentRevision(DeploymentItem selected)
+	{
+		if (selected is null)
+		{
+			throw new ArgumentNullException(nameof(selected));
+		}
+
+		if (string.IsNullOrWhiteSpace(selected.Svn))
+		{
+			return 0;
+		}
+
+		return _svnInfo.GetCurrentRevision(selected.Svn);
 	}
 
 	private void DeployWithRetry(DeploymentItem selected)

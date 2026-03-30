@@ -19,8 +19,10 @@ public sealed class GetSvnCommitsHandler : IQueryHandler<GetSvnCommitsQuery, Get
 			return new GetSvnCommitsResponse(Found: false, Items: Array.Empty<SvnCommitSummary>());
 		}
 
+		var currentRevision = _service.GetSvnCurrentRevision(selected);
+
 		var items = _service.GetSvnCommits(selected, query.Limit)
-			.Select(c => new SvnCommitSummary(c.Revision, c.Author, c.Date, c.Message))
+			.Select(c => new SvnCommitSummary(c.Revision, c.Author, c.Date, c.Message, IsCurrent: c.Revision == currentRevision))
 			.ToList();
 
 		return new GetSvnCommitsResponse(Found: true, Items: items);

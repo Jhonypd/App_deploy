@@ -13,6 +13,7 @@ public static class DependencyInjection
 		services.AddSingleton<ISiteController, IisSiteController>();
 		services.AddSingleton<ISvnLogProvider, SharpSvnLogProvider>();
 		services.AddSingleton<ISvnWorkingCopyUpdater, SharpSvnWorkingCopyUpdater>();
+		services.AddSingleton<ISvnWorkingCopyInfoProvider, SharpSvnWorkingCopyInfoProvider>();
 		services.AddSingleton<IIisStatusProvider, IisStatusProvider>();
 
 		return services;

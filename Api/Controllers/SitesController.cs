@@ -110,7 +110,8 @@ public sealed class SitesController : ControllerBase
                 Revision = c.Revision,
                 Author = c.Author,
                 Date = c.Date,
-                Message = c.Message
+                Message = c.Message,
+                IsCurrent = c.IsCurrent
             })
             .ToList();
 
