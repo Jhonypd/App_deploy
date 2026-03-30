@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.Api;
 
@@ -29,7 +30,14 @@ public sealed class ApiKeyMiddleware : IMiddleware
 		var authResult = ApiAuth.Authorize(context.Request, _options);
 		if (authResult is not null)
 		{
-			await authResult.ExecuteAsync(context);
+			var result = ApiResponseFactory.Error(
+				context,
+				statusCode: authResult.StatusCode,
+				mensagem: authResult.Mensagem,
+				detail: authResult.Detail);
+
+			context.Response.StatusCode = authResult.StatusCode;
+			await result.ExecuteResultAsync(new ActionContext { HttpContext = context });
 			return;
 		}
 

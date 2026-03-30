@@ -1,7 +1,6 @@
 ﻿using App.Api;
 using App.Api.Configurations;
 using App.Application;
-using App.Application.Ports;
 using App.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -17,13 +16,8 @@ builder.Services.AddSingleton(apiOptions);
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-// DI para servicos da API
-builder.Services.AddSingleton<IAppConfigProvider, JsonAppConfigProvider>();
-builder.Services.AddSingleton<IDirectoryDeployer, FileSystemDirectoryDeployer>();
-builder.Services.AddSingleton<IDeploymentValidator, DeploymentValidator>();
-builder.Services.AddSingleton<ISiteController, IisSiteController>();
-builder.Services.AddSingleton<DeploymentService>();
-builder.Services.AddSingleton<IisMonitorService>();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 builder.Services.AddTransient<ApiKeyMiddleware>();
 

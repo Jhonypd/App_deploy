@@ -9,17 +9,20 @@ public sealed class DeploymentService
 	private readonly IDeploymentValidator _validator;
 	private readonly IDirectoryDeployer _deployer;
 	private readonly ISiteController _siteController;
+	private readonly ISvnLogProvider _svnLog;
 
 	public DeploymentService(
 		IAppConfigProvider configProvider,
 		IDeploymentValidator validator,
 		IDirectoryDeployer deployer,
-		ISiteController siteController)
+		ISiteController siteController,
+		ISvnLogProvider svnLog)
 	{
 		_configProvider = configProvider;
 		_validator = validator;
 		_deployer = deployer;
 		_siteController = siteController;
+		_svnLog = svnLog;
 	}
 
 	public IReadOnlyList<DeploymentItem> ListDeployments()
@@ -53,6 +56,21 @@ public sealed class DeploymentService
 				_siteController.StartSite(selected.NomeSite);
 			}
 		}
+	}
+
+	public IReadOnlyList<SvnCommit> GetSvnCommits(DeploymentItem selected, int limit)
+	{
+		if (selected is null)
+		{
+			throw new ArgumentNullException(nameof(selected));
+		}
+
+		if (string.IsNullOrWhiteSpace(selected.Svn))
+		{
+			return Array.Empty<SvnCommit>();
+		}
+
+		return _svnLog.GetCommits(selected.Svn, limit);
 	}
 
 	private void DeployWithRetry(DeploymentItem selected)

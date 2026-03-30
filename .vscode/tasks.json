@@ -5,15 +5,15 @@
       "label": "build",
       "type": "shell",
       "command": "dotnet",
-      "args": ["build", "./App.csproj"],
+      "args": ["build", "./App-deploy.csproj"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "build",
-              "build",
-              "./App-deploy.csproj"
+        "isDefault": true
+      }
     }
   ]
 }

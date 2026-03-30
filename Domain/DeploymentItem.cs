@@ -1,12 +1,9 @@
-using Microsoft.Extensions.Configuration;
-
 namespace App.Domain;
 
 public sealed class DeploymentItem
 {
 	public string Id { get; init; } = string.Empty;
 
-	[ConfigurationKeyName("projetoIis")]
 	public string NomeSite { get; init; } = string.Empty;
 
 	public string Svn { get; set; } = string.Empty;

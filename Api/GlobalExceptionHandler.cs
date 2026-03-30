@@ -1,25 +1,21 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace App.Api;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
-	private readonly IProblemDetailsService _problemDetailsService;
 	private readonly IHostEnvironment _environment;
 	private readonly ILogger<GlobalExceptionHandler> _logger;
 
 	public GlobalExceptionHandler(
-		IProblemDetailsService problemDetailsService,
 		IHostEnvironment environment,
 		ILogger<GlobalExceptionHandler> logger)
 	{
-		_problemDetailsService = problemDetailsService;
 		_environment = environment;
 		_logger = logger;
 	}
@@ -34,31 +30,23 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 		_logger.LogError(exception, "Unhandled exception. {Method} {Path}", httpContext.Request.Method, httpContext.Request.Path);
 
 		var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+		var detail = _environment.IsDevelopment() ? exception.ToString() : exception.Message;
 
-		var problemDetails = new ProblemDetails
+		var envelope = new ApiResponse
 		{
-			Status = statusCode,
-			Title = title,
-			Detail = exception.Message,
-			Instance = httpContext.Request.Path
+			Sucesso = false,
+			Mensagem = title,
+			CodHttp = statusCode,
+			Detail = detail,
+			Resultado = null,
+			TraceId = traceId
 		};
 
-		problemDetails.Extensions["traceId"] = traceId;
-
-		if (_environment.IsDevelopment())
-		{
-			problemDetails.Extensions["exception"] = exception.ToString();
-		}
-
 		httpContext.Response.StatusCode = statusCode;
+		httpContext.Response.ContentType = "application/json; charset=utf-8";
 
-		return await _problemDetailsService.TryWriteAsync(
-			new ProblemDetailsContext
-			{
-				HttpContext = httpContext,
-				ProblemDetails = problemDetails,
-				Exception = exception
-			});
+		await httpContext.Response.WriteAsync(JsonSerializer.Serialize(envelope));
+		return true;
 	}
 
 	private static (int statusCode, string title) Map(Exception exception)

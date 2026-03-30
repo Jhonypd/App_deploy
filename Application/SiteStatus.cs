@@ -1,6 +1,6 @@
-namespace App.Api;
+namespace App.Application;
 
-public sealed class SiteStatusDto
+public sealed class SiteStatus
 {
 	public string Nome { get; init; } = string.Empty;
 	public string EstadoSite { get; init; } = string.Empty;
