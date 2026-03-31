@@ -17,6 +17,16 @@ public sealed class SvnCliLogProvider : ISvnLogProvider
 
 	public IReadOnlyList<SvnCommit> GetCommits(string workingCopyPathOrUrl, int limit)
 	{
+		return GetCommitsInternal(workingCopyPathOrUrl, limit, startRevision: null);
+	}
+
+	public IReadOnlyList<SvnCommit> GetCommits(string workingCopyPathOrUrl, long startRevision, int limit)
+	{
+		return GetCommitsInternal(workingCopyPathOrUrl, limit, startRevision);
+	}
+
+	private IReadOnlyList<SvnCommit> GetCommitsInternal(string workingCopyPathOrUrl, int limit, long? startRevision)
+	{
 		if (string.IsNullOrWhiteSpace(workingCopyPathOrUrl))
 		{
 			throw new ArgumentException("O caminho/URL do SVN não foi informado.", nameof(workingCopyPathOrUrl));
@@ -29,11 +39,14 @@ public sealed class SvnCliLogProvider : ISvnLogProvider
 
 		var cappedLimit = Math.Min(limit, 200);
 		var svnExe = ResolveSvnExe();
+		var revRange = (startRevision.HasValue && startRevision.Value > 0)
+			? $"-r {startRevision.Value}:0 "
+			: string.Empty;
 
 		var psi = new ProcessStartInfo
 		{
 			FileName = svnExe,
-			Arguments = $"log --xml -l {cappedLimit} --non-interactive \"{workingCopyPathOrUrl}\"",
+			Arguments = $"log --xml {revRange}-l {cappedLimit} --non-interactive \"{workingCopyPathOrUrl}\"",
 			UseShellExecute = false,
 			RedirectStandardOutput = true,
 			RedirectStandardError = true,

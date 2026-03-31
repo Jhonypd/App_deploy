@@ -8,6 +8,16 @@ public sealed class SharpSvnLogProvider : ISvnLogProvider
 {
 	public IReadOnlyList<SvnCommit> GetCommits(string workingCopyPathOrUrl, int limit)
 	{
+		return GetCommitsInternal(workingCopyPathOrUrl, limit, startRevision: null);
+	}
+
+	public IReadOnlyList<SvnCommit> GetCommits(string workingCopyPathOrUrl, long startRevision, int limit)
+	{
+		return GetCommitsInternal(workingCopyPathOrUrl, limit, startRevision);
+	}
+
+	private static IReadOnlyList<SvnCommit> GetCommitsInternal(string workingCopyPathOrUrl, int limit, long? startRevision)
+	{
 		if (string.IsNullOrWhiteSpace(workingCopyPathOrUrl))
 		{
 			throw new ArgumentException("O caminho/URL do SVN não foi informado.", nameof(workingCopyPathOrUrl));
@@ -27,6 +37,12 @@ public sealed class SharpSvnLogProvider : ISvnLogProvider
 			RetrieveAllProperties = false,
 			RetrieveChangedPaths = false
 		};
+
+		if (startRevision.HasValue && startRevision.Value > 0)
+		{
+			args.Start = new SvnRevision(startRevision.Value);
+			args.End = SvnRevision.Zero;
+		}
 
 		try
 		{

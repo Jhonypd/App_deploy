@@ -21,7 +21,7 @@ public sealed class GetSvnCommitsHandler : IQueryHandler<GetSvnCommitsQuery, Get
 
 		var currentRevision = _service.GetSvnCurrentRevision(selected);
 
-		var items = _service.GetSvnCommits(selected, query.Limit)
+		var items = _service.GetSvnCommitsFromRevision(selected, currentRevision, query.Limit)
 			.Select(c => new SvnCommitSummary(c.Revision, c.Author, c.Date, c.Message, IsCurrent: c.Revision == currentRevision))
 			.ToList();
 

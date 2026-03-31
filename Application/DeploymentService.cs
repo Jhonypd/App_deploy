@@ -79,6 +79,48 @@ public sealed class DeploymentService
 		return _svnLog.GetCommits(selected.Svn, limit);
 	}
 
+	public IReadOnlyList<SvnCommit> GetSvnCommitsFromRevision(DeploymentItem selected, long startRevision, int limit)
+	{
+		if (selected is null)
+		{
+			throw new ArgumentNullException(nameof(selected));
+		}
+
+		if (string.IsNullOrWhiteSpace(selected.Svn))
+		{
+			return Array.Empty<SvnCommit>();
+		}
+
+		if (startRevision <= 0)
+		{
+			return GetSvnCommits(selected, limit)
+				.OrderByDescending(c => c.Date)
+				.ThenByDescending(c => c.Revision)
+				.Take(limit)
+				.ToList();
+		}
+
+		var commits = _svnLog.GetCommits(selected.Svn, startRevision, limit).ToList();
+
+		// fallback defensivo: se por algum motivo o range não retornar a revisão atual, inclui ela explicitamente
+		if (!commits.Any(c => c.Revision == startRevision))
+		{
+			var currentCommit = _svnLog.GetCommits(selected.Svn, startRevision, limit: 1).FirstOrDefault();
+			if (currentCommit is not null)
+			{
+				commits.Add(currentCommit);
+			}
+		}
+
+		return commits
+			.GroupBy(c => c.Revision)
+			.Select(g => g.First())
+			.OrderByDescending(c => c.Date)
+			.ThenByDescending(c => c.Revision)
+			.Take(limit)
+			.ToList();
+	}
+
 	public void UpdateSvnToRevision(DeploymentItem selected, long revision)
 	{
 		if (selected is null)
