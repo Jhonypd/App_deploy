@@ -17,12 +17,6 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
 
         try
         {
-            // Atualiza SVN uma única vez
-            if (!string.IsNullOrWhiteSpace(svn))
-            {
-                SvnHelper.RunUpdate(svn);
-            }
-
             // Copia todas as origens para o staging
             foreach (var origin in origins)
             {

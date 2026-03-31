@@ -76,8 +76,8 @@ public sealed class SvnCliLogProvider : ISvnLogProvider
 		var stdout = process.StandardOutput.ReadToEnd();
 		var stderr = process.StandardError.ReadToEnd();
 
-		// timeout de 60s
-		if (!process.WaitForExit(60_000))
+		// timeout de 15min (logs grandes / rede / servidor lento)
+		if (!process.WaitForExit(900_000))
 		{
 			try
 			{

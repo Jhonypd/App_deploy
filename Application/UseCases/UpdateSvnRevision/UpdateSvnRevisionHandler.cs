@@ -19,7 +19,7 @@ public sealed class UpdateSvnRevisionHandler : ICommandHandler<UpdateSvnRevision
             return new UpdateSvnRevisionResponse(Found: false, Updated: false, SvnPath: string.Empty, Revision: command.Revision);
         }
 
-        _service.UpdateSvnToRevision(selected, command.Revision);
+        _service.RunAtRevision(selected, command.Revision);
         return new UpdateSvnRevisionResponse(Found: true, Updated: true, SvnPath: selected.Svn, Revision: command.Revision);
     }
 }

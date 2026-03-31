@@ -53,6 +53,44 @@ public sealed class DeploymentService
 		{
 			_validator.Validate(selected);
 			siteWasRunning = _siteController.StopSiteIfRunning(selected.NomeSite);
+			if (!string.IsNullOrWhiteSpace(selected.Svn))
+			{
+				_svnUpdater.UpdateToHead(selected.Svn);
+			}
+			DeployWithRetry(selected);
+		}
+		finally
+		{
+			if (siteWasRunning)
+			{
+				_siteController.StartSite(selected.NomeSite);
+			}
+		}
+	}
+
+	public void RunAtRevision(DeploymentItem selected, long revision)
+	{
+		if (selected is null)
+		{
+			throw new ArgumentNullException(nameof(selected));
+		}
+
+		if (revision <= 0)
+		{
+			throw new ArgumentOutOfRangeException(nameof(revision), "A revision deve ser maior que zero.");
+		}
+
+		var siteWasRunning = false;
+		try
+		{
+			_validator.Validate(selected);
+			if (string.IsNullOrWhiteSpace(selected.Svn))
+			{
+				throw new InvalidOperationException("O item não possui um caminho SVN configurado.");
+			}
+
+			siteWasRunning = _siteController.StopSiteIfRunning(selected.NomeSite);
+			_svnUpdater.UpdateToRevision(selected.Svn, revision);
 			DeployWithRetry(selected);
 		}
 		finally

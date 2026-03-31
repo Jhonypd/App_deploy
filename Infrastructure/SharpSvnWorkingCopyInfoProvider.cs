@@ -21,12 +21,47 @@ public sealed class SharpSvnWorkingCopyInfoProvider : ISvnWorkingCopyInfoProvide
         try
         {
             var fullPath = Path.GetFullPath(workingCopyPath.Trim());
-            if (!client.GetInfo(fullPath, out var info) || info is null)
+
+            // Para marcar o "commit atual" na lista de log do PATH, precisamos de uma revisão que exista no
+            // histórico desse PATH. Em SVN, um working copy pode estar em uma revisão mais alta (ex.: 448), mas
+            // o último commit que alterou esse PATH pode ser menor (ex.: 446). O svn log do PATH começa em 446.
+            // Por isso, priorizamos LastChangeRevision.
+            if (client.GetInfo(fullPath, out var info) && info is not null)
             {
-                throw new InvalidOperationException($"Não foi possível obter informações SVN do path: {workingCopyPath}");
+                var lastChange = (long)info.LastChangeRevision;
+                if (lastChange > 0)
+                {
+                    return lastChange;
+                }
+
+                var infoRevision = (long)info.Revision;
+                if (infoRevision > 0)
+                {
+                    return infoRevision;
+                }
             }
 
-            return info.Revision;
+            // Fallback: tenta via status (WC base revision), útil se o Info falhar.
+            var statusArgs = new SvnStatusArgs
+            {
+                Depth = SvnDepth.Empty,
+                RetrieveAllEntries = true
+            };
+
+            if (client.GetStatus(fullPath, statusArgs, out var statuses) && statuses is not null)
+            {
+                var root = statuses.FirstOrDefault();
+                if (root is not null)
+                {
+                    var statusRevision = (long)root.Revision;
+                    if (statusRevision > 0)
+                    {
+                        return statusRevision;
+                    }
+                }
+            }
+
+            return 0;
         }
         catch (SvnException ex)
         {
