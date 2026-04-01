@@ -5,14 +5,14 @@ namespace App.Infrastructure.Svn;
 /// <summary>
 /// Utilitário para execução de atualização SVN via TortoiseSVN.
 /// </summary>
-public static class SvnHelper
+public static class TortoiseSvnUpdateRunner
 {
     #region Public Methods
 
     /// <summary>
     /// Executa atualização da working copy SVN no caminho informado.
     /// </summary>
-    public static void RunUpdate(string path)
+    public static void RunWorkingCopyUpdate(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("O caminho SVN não foi informado.", nameof(path));

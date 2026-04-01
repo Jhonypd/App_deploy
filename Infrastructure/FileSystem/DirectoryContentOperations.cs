@@ -5,7 +5,7 @@ namespace App.Infrastructure.FileSystem;
 /// <summary>
 /// Utilitarios de manipulacao de diretorios para rotinas de deployment.
 /// </summary>
-public static class DirectoryHelper
+public static class DirectoryContentOperations
 {
     #region Fields
 

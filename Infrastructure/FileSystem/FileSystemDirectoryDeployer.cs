@@ -32,7 +32,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             Console.WriteLine("Aplicando staging no destino...");
 
             var normalizedDestination = PrepareDestination(destinationRoot);
-            DirectoryHelper.CopyDirectoryContents(stagingRoot, normalizedDestination, overwrite: true);
+            DirectoryContentOperations.CopyDirectoryContents(stagingRoot, normalizedDestination, overwrite: true);
         }
         finally
         {
@@ -40,7 +40,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             {
                 if (Directory.Exists(stagingRoot))
                 {
-                    DirectoryHelper.ClearDirectoryContents(stagingRoot);
+                    DirectoryContentOperations.ClearDirectoryContents(stagingRoot);
                     Directory.Delete(stagingRoot, recursive: true);
                 }
             }
@@ -89,7 +89,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             throw new InvalidOperationException($"Destino não existe: {normalized}");
 
         Console.WriteLine($"Limpando destino antes de copiar: {normalized}");
-        DirectoryHelper.ClearDirectoryContents(normalized);
+        DirectoryContentOperations.ClearDirectoryContents(normalized);
 
         return normalized;
     }
@@ -137,7 +137,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             // Copia só o conteúdo interno da pasta
             if (origin.Conteudo)
             {
-                DirectoryHelper.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
+                DirectoryContentOperations.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
                 return;
             }
 
@@ -147,7 +147,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             if (!string.IsNullOrWhiteSpace(destinationLeaf) &&
                 string.Equals(dirName, destinationLeaf, StringComparison.OrdinalIgnoreCase))
             {
-                DirectoryHelper.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
+                DirectoryContentOperations.CopyDirectoryContents(originPath, stagingRoot, overwrite: true);
                 return;
             }
 
@@ -155,7 +155,7 @@ public sealed class FileSystemDirectoryDeployer : IDirectoryDeployer
             var destDir = Path.Combine(stagingRoot, dirName);
             Directory.CreateDirectory(destDir);
 
-            DirectoryHelper.CopyDirectoryContents(originPath, destDir, overwrite: true);
+            DirectoryContentOperations.CopyDirectoryContents(originPath, destDir, overwrite: true);
             return;
         }
 
