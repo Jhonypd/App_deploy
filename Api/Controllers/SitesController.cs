@@ -1,9 +1,10 @@
-using App.Application.Abstractions;
-using App.Application.UseCases.GetIisStatus;
-using App.Application.UseCases.GetSvnCommits;
-using App.Application.UseCases.ListDeployments;
-using App.Application.UseCases.RunDeployment;
-using App.Application.UseCases.UpdateSvnRevision;
+using App.Application.Messaging;
+using App.Application.Deployments.GetIisStatus;
+using App.Application.Deployments.GetSvnCommits;
+using App.Application.Deployments.GetAllDeployments;
+using App.Application.Deployments.RunDeployment;
+using App.Application.Deployments.UpdateSvnRevision;
+using App.Api.Dtos.Deployments.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,32 +12,46 @@ namespace App.Api.Controllers;
 
 [ApiController]
 [Route("v1/[controller]")]
+/// <summary>
+/// Expõe endpoints para listagem, execução e status de deployments e SVN.
+/// </summary>
 public sealed class SitesController : ControllerBase
 {
-    private readonly IQueryHandler<ListDeploymentsQuery, ListDeploymentsResponse> _listDeployments;
+    #region Fields
+    private readonly IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse> _getAllDeployments;
     private readonly ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> _runDeployment;
     private readonly IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> _svnCommits;
     private readonly IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> _iisStatus;
     private readonly ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse> _svnUpdate;
+    #endregion
 
+    #region Constructors
+    /// <summary>
+    /// Inicializa as dependências de casos de uso do controlador.
+    /// </summary>
     public SitesController(
-        IQueryHandler<ListDeploymentsQuery, ListDeploymentsResponse> listDeployments,
+        IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse> getAllDeployments,
         ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> runDeployment,
         IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> svnCommits,
         IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> iisStatus,
         ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse> svnUpdate)
     {
-        _listDeployments = listDeployments;
+        _getAllDeployments = getAllDeployments;
         _runDeployment = runDeployment;
         _svnCommits = svnCommits;
         _iisStatus = iisStatus;
         _svnUpdate = svnUpdate;
     }
+    #endregion
 
+    #region Endpoints
+    /// <summary>
+    /// Retorna todos os deployments configurados.
+    /// </summary>
     [HttpGet("Lista")]
-    public IActionResult List()
+    public IActionResult GetAllDeployments()
     {
-        var response = _listDeployments.Handle(new ListDeploymentsQuery());
+        var response = _getAllDeployments.Handle(new GetAllDeploymentsQuery());
 
         var list = response.Items
             .Select(d => new DeploymentDto
@@ -45,15 +60,18 @@ public sealed class SitesController : ControllerBase
                 NomeSite = d.NomeSite,
                 Svn = d.Svn,
                 Destino = d.Destino,
-                Origens = d.Origens.Select(o => new OriginDto { Path = o.Path, Conteudo = o.Conteudo }).ToList()
+                Origins = d.Origins.Select(o => new OriginDto { Path = o.Path, Conteudo = o.Conteudo }).ToList()
             })
             .ToList();
 
         return ApiResponseFactory.Ok(HttpContext, list);
     }
 
+    /// <summary>
+    /// Executa o deployment do item informado.
+    /// </summary>
     [HttpPost("Executar")]
-    public IActionResult Run([FromHeader(Name = "id")] string? id)
+    public IActionResult RunDeployment([FromHeader(Name = "id")] string? id)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -69,24 +87,59 @@ public sealed class SitesController : ControllerBase
         return ApiResponseFactory.Ok(HttpContext, new { ok = response.Started });
     }
 
+    /// <summary>
+    /// Lista os commits SVN mais recentes para o item selecionado.
+    /// </summary>
     [HttpGet("SvnCommits")]
     public IActionResult SvnCommits(
         [FromHeader(Name = "id")] string? id,
         [FromQuery(Name = "limit")] int limit = 20)
     {
-        return SvnCommitsInternal(id, limit);
+        return HandleSvnCommitsRequest(id, limit);
     }
 
+    /// <summary>
+    /// Atualiza o working copy para uma revisão específica do SVN.
+    /// </summary>
     [HttpPost("SvnUpdate")]
     public IActionResult SvnUpdate(
         [FromHeader(Name = "id")] string? id,
         [FromHeader(Name = "revision")] long revision)
     {
-        return SvnUpdateInternal(id, revision);
+        return HandleSvnUpdateRequest(id, revision);
     }
 
+    /// <summary>
+    /// Retorna o status atual dos sites no IIS.
+    /// </summary>
+    [HttpGet("Status")]
+    public IActionResult GetIisStatus()
+    {
+        var response = _iisStatus.Handle(new GetIisStatusQuery());
 
-    private IActionResult SvnCommitsInternal(string? id, int limit)
+        var status = response.Items
+            .Select(s => new SiteStatusDto
+            {
+                Nome = s.Nome,
+                EstadoSite = s.EstadoSite,
+                AppPool = s.AppPool,
+                EstadoAppPool = s.EstadoAppPool,
+                Pid = s.Pid,
+                MemoriaMb = s.MemoriaMb,
+                Cpu = s.Cpu,
+                ProcessoAtivo = s.ProcessoAtivo
+            })
+            .ToList();
+
+        return ApiResponseFactory.Ok(HttpContext, status);
+    }
+    #endregion
+
+    #region Helpers
+    /// <summary>
+    /// Valida e processa a consulta de commits SVN.
+    /// </summary>
+    private IActionResult HandleSvnCommitsRequest(string? id, int limit)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -118,7 +171,10 @@ public sealed class SitesController : ControllerBase
         return ApiResponseFactory.Ok(HttpContext, commits);
     }
 
-    private IActionResult SvnUpdateInternal(string? id, long revision)
+    /// <summary>
+    /// Valida e processa a atualização SVN para uma revisão específica.
+    /// </summary>
+    private IActionResult HandleSvnUpdateRequest(string? id, long revision)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -138,26 +194,5 @@ public sealed class SitesController : ControllerBase
 
         return ApiResponseFactory.Ok(HttpContext, new { ok = response.Updated, id, revision, svn = response.SvnPath });
     }
-
-    [HttpGet("Status")]
-    public IActionResult Status()
-    {
-        var response = _iisStatus.Handle(new GetIisStatusQuery());
-
-        var status = response.Items
-            .Select(s => new SiteStatusDto
-            {
-                Nome = s.Nome,
-                EstadoSite = s.EstadoSite,
-                AppPool = s.AppPool,
-                EstadoAppPool = s.EstadoAppPool,
-                Pid = s.Pid,
-                MemoriaMb = s.MemoriaMb,
-                Cpu = s.Cpu,
-                ProcessoAtivo = s.ProcessoAtivo
-            })
-            .ToList();
-
-        return ApiResponseFactory.Ok(HttpContext, status);
-    }
+    #endregion
 }

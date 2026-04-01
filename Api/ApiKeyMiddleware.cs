@@ -3,15 +3,34 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace App.Api;
 
+/// <summary>
+/// Middleware responsável por validar API key antes de processar as requisições.
+/// </summary>
 public sealed class ApiKeyMiddleware : IMiddleware
 {
+	#region Fields
+
 	private readonly ApiOptions _options;
 
+	#endregion
+
+	#region Constructors
+
+	/// <summary>
+	/// Inicializa o middleware com as opções de autenticação.
+	/// </summary>
 	public ApiKeyMiddleware(ApiOptions options)
 	{
 		_options = options;
 	}
 
+	#endregion
+
+	#region Public Methods
+
+	/// <summary>
+	/// Intercepta a requisição e aplica validação de API key quando necessário.
+	/// </summary>
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
 		if (HttpMethods.IsOptions(context.Request.Method))
@@ -43,4 +62,6 @@ public sealed class ApiKeyMiddleware : IMiddleware
 
 		await next(context);
 	}
+
+	#endregion
 }

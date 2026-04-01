@@ -1,22 +1,30 @@
-using App.Application.Abstractions;
-using App.Application.Ports;
-using App.Application.UseCases.GetIisStatus;
-using App.Application.UseCases.GetSvnCommits;
-using App.Application.UseCases.ListDeployments;
-using App.Application.UseCases.RunDeployment;
-using App.Application.UseCases.UpdateSvnRevision;
+using App.Application.Messaging;
+using App.Application.Interfaces;
+using App.Application.Deployments.GetIisStatus;
+using App.Application.Deployments.GetSvnCommits;
+using App.Application.Deployments.GetAllDeployments;
+using App.Application.Deployments.RunDeployment;
+using App.Application.Deployments.UpdateSvnRevision;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace App.Application;
 
+/// <summary>
+/// Extensões para registro dos serviços da camada de aplicação.
+/// </summary>
 public static class DependencyInjection
 {
+	#region Public Methods
+
+	/// <summary>
+	/// Registra serviços, comandos e consultas da aplicação no contêiner DI.
+	/// </summary>
 	public static IServiceCollection AddApplication(this IServiceCollection services)
 	{
-		services.AddSingleton<IDeploymentValidator, DeploymentValidator>();
-		services.AddSingleton<DeploymentService>();
+		services.AddSingleton<IDeploymentConfigurationValidator, DeploymentConfigurationValidator>();
+		services.AddSingleton<DeploymentOrchestratorService>();
 
-		services.AddSingleton<IQueryHandler<ListDeploymentsQuery, ListDeploymentsResponse>, ListDeploymentsHandler>();
+		services.AddSingleton<IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse>, GetAllDeploymentsHandler>();
 		services.AddSingleton<ICommandHandler<RunDeploymentCommand, RunDeploymentResponse>, RunDeploymentHandler>();
 		services.AddSingleton<IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse>, GetSvnCommitsHandler>();
 		services.AddSingleton<IQueryHandler<GetIisStatusQuery, GetIisStatusResponse>, GetIisStatusHandler>();
@@ -24,4 +32,6 @@ public static class DependencyInjection
 
 		return services;
 	}
+
+	#endregion
 }

@@ -7,11 +7,23 @@ using System.Text.Json;
 
 namespace App.Api;
 
+/// <summary>
+/// Handler global para mapear exceções em respostas HTTP padronizadas.
+/// </summary>
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
+	#region Fields
+
 	private readonly IHostEnvironment _environment;
 	private readonly ILogger<GlobalExceptionHandler> _logger;
 
+	#endregion
+
+	#region Constructors
+
+	/// <summary>
+	/// Inicializa o handler de exceções globais.
+	/// </summary>
 	public GlobalExceptionHandler(
 		IHostEnvironment environment,
 		ILogger<GlobalExceptionHandler> logger)
@@ -20,6 +32,13 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 		_logger = logger;
 	}
 
+	#endregion
+
+	#region Public Methods
+
+	/// <summary>
+	/// Tenta tratar uma exceção não capturada e escrever a resposta HTTP.
+	/// </summary>
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
 		Exception exception,
@@ -49,6 +68,13 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 		return true;
 	}
 
+	#endregion
+
+	#region Private Methods
+
+	/// <summary>
+	/// Mapeia uma exceção para código HTTP e título de erro amigável.
+	/// </summary>
 	private static (int statusCode, string title) Map(Exception exception)
 	{
 		return exception switch
@@ -62,4 +88,6 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 			_ => (StatusCodes.Status500InternalServerError, "Erro interno")
 		};
 	}
+
+	#endregion
 }

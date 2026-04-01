@@ -2,10 +2,25 @@ using Microsoft.AspNetCore.Http;
 
 namespace App.Api;
 
+/// <summary>
+/// Centraliza a validação de API key para as requisições da API.
+/// </summary>
 public static class ApiAuth
 {
+	#region Constants
+
+	/// <summary>
+	/// Nome do cabeçalho HTTP usado para transportar a API key.
+	/// </summary>
 	public const string ApiKeyHeader = "X-Api-Key";
 
+	#endregion
+
+	#region Public Methods
+
+	/// <summary>
+	/// Valida a API key recebida na requisição.
+	/// </summary>
 	public static ApiAuthFailure? Authorize(HttpRequest request, ApiOptions options)
 	{
 		if (string.IsNullOrWhiteSpace(options.ApiKey))
@@ -25,6 +40,11 @@ public static class ApiAuth
 
 		return null;
 	}
+
+	#endregion
 }
 
+/// <summary>
+/// Representa o erro de autenticação por API key.
+/// </summary>
 public sealed record ApiAuthFailure(int StatusCode, string Mensagem, string Detail);

@@ -4,8 +4,16 @@ using Microsoft.OpenApi.Models;
 
 namespace App.Api.Configurations;
 
+/// <summary>
+/// Extensões de configuração do Swagger para a API.
+/// </summary>
 public static class SwaggerConfig
 {
+    #region Public Methods
+
+    /// <summary>
+    /// Registra os serviços do Swagger com suporte a API key.
+    /// </summary>
     public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
@@ -46,6 +54,9 @@ public static class SwaggerConfig
         return services;
     }
 
+    /// <summary>
+    /// Ativa o middleware do Swagger e da UI no pipeline HTTP.
+    /// </summary>
     public static IApplicationBuilder UseSwaggerConfig(this IApplicationBuilder app)
     {
         app.UseSwagger();
@@ -57,4 +68,6 @@ public static class SwaggerConfig
 
         return app;
     }
+
+    #endregion
 }
