@@ -53,7 +53,7 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Retorna todos os deployments configurados.
     /// </summary>
-    [HttpGet("Lista")]
+    [HttpGet("Listar")]
     public IActionResult GetAllDeployments()
     {
         var response = _getAllDeployments.Handle(new GetAllDeploymentsQuery());
@@ -65,7 +65,8 @@ public sealed class SitesController : ControllerBase
                 NomeSite = d.NomeSite,
                 Svn = d.Svn,
                 Destino = d.Destino,
-                Origins = d.Origins.Select(o => new OriginDto { Path = o.Path, Conteudo = o.Conteudo }).ToList()
+                Origins = d.Origins.Select(o => new OriginDto { Path = o.Path, Conteudo = o.Conteudo }).ToList(),
+                Atualizada = d.Atualizada
             })
             .ToList();
 
@@ -75,7 +76,7 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Executa o deployment do item informado.
     /// </summary>
-    [HttpPost("Executar")]
+    [HttpPost("AtualizarAplicacao")]
     public IActionResult RunDeployment([FromHeader(Name = "id")] string? id)
     {
         if (string.IsNullOrWhiteSpace(id))
@@ -95,7 +96,7 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Lista os commits SVN mais recentes para o item selecionado.
     /// </summary>
-    [HttpGet("SvnCommits")]
+    [HttpGet("ListarCommits")]
     public IActionResult SvnCommits(
         [FromHeader(Name = "id")] string? id,
         [FromQuery(Name = "limit")] int limit = 20)
@@ -106,7 +107,7 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Atualiza o working copy para uma revisão específica do SVN.
     /// </summary>
-    [HttpPost("SvnUpdate")]
+    [HttpPost("VoltarCommit")]
     public IActionResult SvnUpdate(
         [FromHeader(Name = "id")] string? id,
         [FromHeader(Name = "revision")] long revision)
@@ -117,7 +118,7 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Retorna o status atual dos sites no IIS.
     /// </summary>
-    [HttpGet("Status")]
+    [HttpGet("ConsultarStatus")]
     public IActionResult GetIisStatus()
     {
         var response = _iisStatus.Handle(new GetIisStatusQuery());

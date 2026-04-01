@@ -26,13 +26,15 @@ public static class SwaggerConfig
                 Version = "v1"
             });
 
-            // API Key via header X-Api-Key
+            // API Key via header Authorization (Bearer)
             o.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
             {
-                Description = "Informe a chave no header X-Api-Key",
-                Name = "X-Api-Key",
+                Description = "Informe a chave no header Authorization no formato: Bearer <chave>",
+                Name = "Authorization",
                 In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "ApiKey"
             });
 
             o.AddSecurityRequirement(new OpenApiSecurityRequirement

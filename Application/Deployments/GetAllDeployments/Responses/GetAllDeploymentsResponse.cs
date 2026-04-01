@@ -14,7 +14,8 @@ public sealed record DeploymentSummary(
 	string NomeSite,
 	string Svn,
 	string Destino,
-	IReadOnlyList<OriginSummary> Origins);
+	IReadOnlyList<OriginSummary> Origins,
+	bool Atualizada);
 
 /// <summary>
 /// Visão resumida de uma origem de deployment.

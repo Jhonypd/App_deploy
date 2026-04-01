@@ -30,15 +30,42 @@ public sealed class GetAllDeploymentsHandler : IQueryHandler<GetAllDeploymentsQu
 	public GetAllDeploymentsResponse Handle(GetAllDeploymentsQuery query)
 	{
 		var items = _service.GetAllDeployments()
-			.Select(d => new DeploymentSummary(
-				d.Id,
-				d.NomeSite,
-				d.Svn,
-				d.Destino,
-				d.Origins.Select(o => new OriginSummary(o.Path, o.Conteudo)).ToList()))
+			.Select(BuildDeploymentSummary)
 			.ToList();
 
 		return new GetAllDeploymentsResponse(items);
+	}
+	#endregion
+
+	#region Private Methods
+	/// <summary>
+	/// Monta o resumo de deployment incluindo status de atualização SVN.
+	/// </summary>
+	private DeploymentSummary BuildDeploymentSummary(App.Domain.DeploymentItem deployment)
+	{
+		var isUpdated = false;
+
+		if (!string.IsNullOrWhiteSpace(deployment.Svn))
+		{
+			try
+			{
+				var currentRevision = _service.GetCurrentSvnRevision(deployment);
+				var latestRevision = _service.GetSvnCommits(deployment, 1).FirstOrDefault()?.Revision;
+				isUpdated = latestRevision.HasValue && currentRevision >= latestRevision.Value;
+			}
+			catch
+			{
+				// Falhas de acesso ao SVN não devem interromper a listagem de aplicações.
+			}
+		}
+
+		return new DeploymentSummary(
+			deployment.Id,
+			deployment.NomeSite,
+			deployment.Svn,
+			deployment.Destino,
+			deployment.Origins.Select(o => new OriginSummary(o.Path, o.Conteudo)).ToList(),
+			isUpdated);
 	}
 	#endregion
 }

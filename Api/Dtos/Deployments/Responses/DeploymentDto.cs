@@ -39,5 +39,11 @@ public sealed class DeploymentDto
 	[JsonPropertyName("destino")]
 	public string Destino { get; init; } = string.Empty;
 
+	/// <summary>
+	/// Indica se a working copy local está atualizada com a última revisão.
+	/// </summary>
+	[JsonPropertyName("atualizada")]
+	public bool Atualizada { get; init; }
+
 	#endregion
 }
