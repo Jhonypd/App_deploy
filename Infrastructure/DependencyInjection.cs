@@ -1,4 +1,8 @@
 using App.Application.Interfaces;
+using App.Infrastructure.Configuration;
+using App.Infrastructure.FileSystem;
+using App.Infrastructure.Iis;
+using App.Infrastructure.Svn;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

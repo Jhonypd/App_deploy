@@ -1,4 +1,4 @@
-namespace App.Application.Deployments.GetAllDeployments;
+namespace App.Application.Deployments.GetAllDeployments.Responses;
 
 /// <summary>
 /// Resposta da listagem de deployments.

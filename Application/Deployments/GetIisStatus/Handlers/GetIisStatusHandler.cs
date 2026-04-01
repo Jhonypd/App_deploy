@@ -1,7 +1,9 @@
 using App.Application.Messaging;
 using App.Application.Interfaces;
+using App.Application.Deployments.GetIisStatus.Queries;
+using App.Application.Deployments.GetIisStatus.Responses;
 
-namespace App.Application.Deployments.GetIisStatus;
+namespace App.Application.Deployments.GetIisStatus.Handlers;
 
 /// <summary>
 /// Manipula a consulta de status dos sites IIS.

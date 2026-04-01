@@ -1,4 +1,6 @@
-namespace App.Application.Deployments.GetIisStatus;
+using App.Application;
+
+namespace App.Application.Deployments.GetIisStatus.Responses;
 
 #region Response Models
 

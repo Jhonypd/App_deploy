@@ -1,10 +1,20 @@
 using App.Application.Messaging;
 using App.Application.Interfaces;
-using App.Application.Deployments.GetIisStatus;
-using App.Application.Deployments.GetSvnCommits;
-using App.Application.Deployments.GetAllDeployments;
-using App.Application.Deployments.RunDeployment;
-using App.Application.Deployments.UpdateSvnRevision;
+using App.Application.Deployments.GetAllDeployments.Handlers;
+using App.Application.Deployments.GetAllDeployments.Queries;
+using App.Application.Deployments.GetAllDeployments.Responses;
+using App.Application.Deployments.GetIisStatus.Handlers;
+using App.Application.Deployments.GetIisStatus.Queries;
+using App.Application.Deployments.GetIisStatus.Responses;
+using App.Application.Deployments.GetSvnCommits.Handlers;
+using App.Application.Deployments.GetSvnCommits.Queries;
+using App.Application.Deployments.GetSvnCommits.Responses;
+using App.Application.Deployments.RunDeployment.Commands;
+using App.Application.Deployments.RunDeployment.Handlers;
+using App.Application.Deployments.RunDeployment.Responses;
+using App.Application.Deployments.UpdateSvnRevision.Commands;
+using App.Application.Deployments.UpdateSvnRevision.Handlers;
+using App.Application.Deployments.UpdateSvnRevision.Responses;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace App.Application;

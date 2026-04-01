@@ -1,6 +1,7 @@
 using App.Application.Messaging;
+using App.Application.Deployments.GetSvnCommits.Responses;
 
-namespace App.Application.Deployments.GetSvnCommits;
+namespace App.Application.Deployments.GetSvnCommits.Queries;
 
 #region Query
 

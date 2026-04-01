@@ -1,8 +1,7 @@
 using App.Application.Interfaces;
 using App.Domain;
-using App.Infrastructure.FileSystem;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.FileSystem;
 
 /// <summary>
 /// Realiza deployment por cópia de arquivos usando staging temporário.

@@ -1,6 +1,8 @@
 using App.Application.Messaging;
+using App.Application.Deployments.GetAllDeployments.Queries;
+using App.Application.Deployments.GetAllDeployments.Responses;
 
-namespace App.Application.Deployments.GetAllDeployments;
+namespace App.Application.Deployments.GetAllDeployments.Handlers;
 
 /// <summary>
 /// Handler responsável por retornar todos os deployments cadastrados.

@@ -1,7 +1,7 @@
 using App.Application.Interfaces;
 using SharpSvn;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Svn;
 
 /// <summary>
 /// Implementação para leitura de revisão atual da working copy usando SharpSvn.

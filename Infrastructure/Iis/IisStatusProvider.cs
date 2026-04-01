@@ -4,7 +4,7 @@ using App.Application;
 using App.Application.Interfaces;
 using Microsoft.Web.Administration;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Iis;
 
 [SupportedOSPlatform("windows")]
 public sealed class IisStatusProvider : IIisStatusProvider

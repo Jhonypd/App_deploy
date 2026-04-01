@@ -1,4 +1,4 @@
-namespace App.Application.Deployments.UpdateSvnRevision;
+namespace App.Application.Deployments.UpdateSvnRevision.Responses;
 
 #region Response Models
 

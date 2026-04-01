@@ -1,7 +1,7 @@
 using App.Application.Interfaces;
 using Microsoft.Web.Administration;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Iis;
 
 /// <summary>
 /// Implementa operações de parada e inicialização de sites no IIS.

@@ -1,4 +1,4 @@
-namespace App.Application.Deployments.RunDeployment;
+namespace App.Application.Deployments.RunDeployment.Responses;
 
 #region Response Models
 

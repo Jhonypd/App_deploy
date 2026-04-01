@@ -2,7 +2,7 @@ using App.Application.Interfaces;
 using App.Domain;
 using Microsoft.Extensions.Configuration;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Configuration;
 
 /// <summary>
 /// Carrega as configurações da aplicação a partir de arquivo JSON.

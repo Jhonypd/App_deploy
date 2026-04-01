@@ -1,6 +1,7 @@
 using App.Application.Messaging;
+using App.Application.Deployments.UpdateSvnRevision.Responses;
 
-namespace App.Application.Deployments.UpdateSvnRevision;
+namespace App.Application.Deployments.UpdateSvnRevision.Commands;
 
 #region Command
 

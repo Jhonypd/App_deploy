@@ -1,6 +1,8 @@
 using App.Application.Messaging;
+using App.Application.Deployments.RunDeployment.Commands;
+using App.Application.Deployments.RunDeployment.Responses;
 
-namespace App.Application.Deployments.RunDeployment;
+namespace App.Application.Deployments.RunDeployment.Handlers;
 
 /// <summary>
 /// Manipula a execução de deployment para um item configurado.

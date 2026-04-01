@@ -4,7 +4,7 @@ using App.Application.Interfaces;
 using App.Domain;
 using Microsoft.Extensions.Configuration;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Svn;
 
 /// <summary>
 /// Implementação de leitura de logs SVN usando a CLI nativa (svn.exe).

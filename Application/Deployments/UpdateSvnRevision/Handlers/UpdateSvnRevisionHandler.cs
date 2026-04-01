@@ -1,6 +1,8 @@
 using App.Application.Messaging;
+using App.Application.Deployments.UpdateSvnRevision.Commands;
+using App.Application.Deployments.UpdateSvnRevision.Responses;
 
-namespace App.Application.Deployments.UpdateSvnRevision;
+namespace App.Application.Deployments.UpdateSvnRevision.Handlers;
 
 /// <summary>
 /// Manipula a atualização de revisão SVN para um deployment.

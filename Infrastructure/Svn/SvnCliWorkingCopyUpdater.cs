@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using App.Application.Interfaces;
 
-namespace App.Infrastructure;
+namespace App.Infrastructure.Svn;
 
 /// <summary>
 /// Implementação de atualização de working copy SVN usando CLI (svn.exe).

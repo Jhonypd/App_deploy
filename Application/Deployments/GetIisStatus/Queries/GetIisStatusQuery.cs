@@ -1,6 +1,7 @@
 using App.Application.Messaging;
+using App.Application.Deployments.GetIisStatus.Responses;
 
-namespace App.Application.Deployments.GetIisStatus;
+namespace App.Application.Deployments.GetIisStatus.Queries;
 
 #region Query
 

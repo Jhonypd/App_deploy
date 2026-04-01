@@ -1,4 +1,4 @@
-namespace App.Application.Deployments.GetSvnCommits;
+namespace App.Application.Deployments.GetSvnCommits.Responses;
 
 #region Response Models
 
