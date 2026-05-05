@@ -1,4 +1,6 @@
 using App.Application;
+using System.Net.NetworkInformation;
+
 
 namespace App.Application.Interfaces;
 
@@ -7,12 +9,12 @@ namespace App.Application.Interfaces;
 /// </summary>
 public interface IIisStatusProvider
 {
-	#region Methods
+    #region Methods
 
-	/// <summary>
-	/// Obtém o status atual dos sites IIS disponíveis.
-	/// </summary>
-	IReadOnlyList<SiteStatus> GetStatus();
+    /// <summary>
+    /// Obtém o status atual dos sites IIS disponíveis.
+    /// </summary>
+    IisStatus GetStatus();
 
-	#endregion
+    #endregion
 }

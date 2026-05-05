@@ -15,7 +15,13 @@ using App.Application.Deployments.RunDeployment.Responses;
 using App.Application.Deployments.UpdateSvnRevision.Commands;
 using App.Application.Deployments.UpdateSvnRevision.Handlers;
 using App.Application.Deployments.UpdateSvnRevision.Responses;
+using App.Application.Deployments.SaveSiteDeploy.Commands;
+using App.Application.Deployments.SaveSiteDeploy.Queries;
+using App.Application.Deployments.SaveSiteDeploy.Responses;
+using App.Application.Deployments.SaveSiteDeploy.Handlers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace App.Application;
 
@@ -31,14 +37,23 @@ public static class DependencyInjection
 	/// </summary>
 	public static IServiceCollection AddApplication(this IServiceCollection services)
 	{
-		services.AddSingleton<IDeploymentConfigurationValidator, DeploymentConfigurationValidator>();
-		services.AddSingleton<DeploymentOrchestratorService>();
+		services.AddScoped<IDeploymentConfigurationValidator, DeploymentConfigurationValidator>();
+		services.AddScoped<DeploymentOrchestratorService>();
 
-		services.AddSingleton<IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse>, GetAllDeploymentsHandler>();
-		services.AddSingleton<ICommandHandler<RunDeploymentCommand, RunDeploymentResponse>, RunDeploymentHandler>();
-		services.AddSingleton<IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse>, GetSvnCommitsHandler>();
-		services.AddSingleton<IQueryHandler<GetIisStatusQuery, GetIisStatusResponse>, GetIisStatusHandler>();
-		services.AddSingleton<ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse>, UpdateSvnRevisionHandler>();
+		services.AddScoped<IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse>, GetAllDeploymentsHandler>();
+		services.AddScoped<ICommandHandler<RunDeploymentCommand, RunDeploymentResponse>, RunDeploymentHandler>();
+		services.AddScoped<IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse>, GetSvnCommitsHandler>();
+		services.AddScoped<IQueryHandler<GetIisStatusQuery, GetIisStatusResponse>, GetIisStatusHandler>();
+		services.AddScoped<ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse>, UpdateSvnRevisionHandler>();
+
+		services.AddScoped<ICommandHandler<CriarSiteDeployCommand, Task<SiteDeployResponse>>, CriarSiteDeployHandler>();
+		services.AddScoped<ICommandHandler<AtualizarSiteDeployCommand, Task<SiteDeployResponse>>, AtualizarSiteDeployHandler>();
+		services.AddScoped<ICommandHandler<RemoverSiteDeployCommand, Task<bool>>, RemoverSiteDeployHandler>();
+		services.AddScoped<IQueryHandler<ObterSitesDeployQuery, Task<List<SiteDeployResponse>>>, ObterSitesDeployHandler>();
+		services.AddScoped<IQueryHandler<ObterSiteDeployPorIdQuery, Task<SiteDeployResponse?>>, ObterSiteDeployPorIdHandler>();
+
+		services.AddScoped<ICommandHandler<AplicarSiteIisCommand, Task<bool>>, AplicarSiteIisHandler>();
+		services.AddScoped<ICommandHandler<RemoverSiteIisCommand, Task<bool>>, RemoverSiteIisHandler>();
 
 		return services;
 	}

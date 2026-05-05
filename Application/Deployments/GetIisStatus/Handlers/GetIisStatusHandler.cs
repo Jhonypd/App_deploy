@@ -35,8 +35,8 @@ public sealed class GetIisStatusHandler : IQueryHandler<GetIisStatusQuery, GetIi
 	/// </summary>
 	public GetIisStatusResponse Handle(GetIisStatusQuery query)
 	{
-		var items = _provider.GetStatus().ToList();
-		return new GetIisStatusResponse(items);
+		var status = _provider.GetStatus();
+		return new GetIisStatusResponse(status);
 	}
 
 	#endregion

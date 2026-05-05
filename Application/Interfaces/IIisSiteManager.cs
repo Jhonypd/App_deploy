@@ -17,5 +17,15 @@ public interface IIisSiteManager
 	/// </summary>
 	void StartSite(string siteName);
 
+	/// <summary>
+	/// Cria ou atualiza as configurações de um site no IIS.
+	/// </summary>
+	void CriarOuAtualizarSite(string nomeSite, string caminhoFisico);
+
+	/// <summary>
+	/// Remove um site do IIS, se existir.
+	/// </summary>
+	void RemoverSite(string nomeSite);
+
 	#endregion
 }

@@ -15,11 +15,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace App.Api.Controllers;
 
+/// <summary>
+/// Controlador responsável por listar deployments, executar deploy e consultar status do IIS e SVN.
+/// </summary>
 [ApiController]
 [Route("v1/[controller]")]
-/// <summary>
-/// Expõe endpoints para listagem, execução e status de deployments e SVN.
-/// </summary>
 public sealed class SitesController : ControllerBase
 {
     #region Fields
@@ -51,9 +51,9 @@ public sealed class SitesController : ControllerBase
 
     #region Endpoints
     /// <summary>
-    /// Retorna todos os deployments configurados.
+    /// Lista todos os deployments configurados para execução.
     /// </summary>
-    [HttpGet("Listar")]
+    [HttpGet("listar")]
     public IActionResult GetAllDeployments()
     {
         var response = _getAllDeployments.Handle(new GetAllDeploymentsQuery());
@@ -74,9 +74,9 @@ public sealed class SitesController : ControllerBase
     }
 
     /// <summary>
-    /// Executa o deployment do item informado.
+    /// Executa o deployment da aplicação informada pelo identificador.
     /// </summary>
-    [HttpPost("AtualizarAplicacao")]
+    [HttpPost("executar")]
     public IActionResult RunDeployment([FromHeader(Name = "id")] string? id)
     {
         if (string.IsNullOrWhiteSpace(id))
@@ -94,9 +94,9 @@ public sealed class SitesController : ControllerBase
     }
 
     /// <summary>
-    /// Lista os commits SVN mais recentes para o item selecionado.
+    /// Lista os commits SVN mais recentes do deployment informado.
     /// </summary>
-    [HttpGet("ListarCommits")]
+    [HttpGet("svn/commits")]
     public IActionResult SvnCommits(
         [FromHeader(Name = "id")] string? id,
         [FromQuery(Name = "limit")] int limit = 20)
@@ -105,9 +105,9 @@ public sealed class SitesController : ControllerBase
     }
 
     /// <summary>
-    /// Atualiza o working copy para uma revisão específica do SVN.
+    /// Atualiza o working copy SVN do deployment para uma revisão específica.
     /// </summary>
-    [HttpPost("VoltarCommit")]
+    [HttpPost("svn/voltar-commit")]
     public IActionResult SvnUpdate(
         [FromHeader(Name = "id")] string? id,
         [FromHeader(Name = "revision")] long revision)
@@ -118,13 +118,14 @@ public sealed class SitesController : ControllerBase
     /// <summary>
     /// Retorna o status atual dos sites no IIS.
     /// </summary>
-    [HttpGet("ConsultarStatus")]
+    [HttpGet("iis/status")]
     public IActionResult GetIisStatus()
     {
         var response = _iisStatus.Handle(new GetIisStatusQuery());
 
-        var status = response.Items
-            .Select(s => new SiteStatusDto
+        var statusDto = new
+        {
+            Sites = response.Status.Sites.Select(s => new SiteStatusDto
             {
                 Nome = s.Nome,
                 EstadoSite = s.EstadoSite,
@@ -134,10 +135,14 @@ public sealed class SitesController : ControllerBase
                 MemoriaMb = s.MemoriaMb,
                 Cpu = s.Cpu,
                 ProcessoAtivo = s.ProcessoAtivo
-            })
-            .ToList();
+            }).ToList(),
+            TotalMemoriaMb = response.Status.TotalMemoriaMb,
+            TotalCpu = response.Status.TotalCpu,
+            TotalSites = response.Status.TotalSites,
+            TotalSitesComProcessoAtivo = response.Status.TotalSitesComProcessoAtivo
+        };
 
-        return ApiResponseFactory.Ok(HttpContext, status);
+        return ApiResponseFactory.Ok(HttpContext, statusDto);
     }
     #endregion
 

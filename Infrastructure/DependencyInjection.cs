@@ -1,8 +1,12 @@
+using App.Infrastructure.Data;
 using App.Application.Interfaces;
 using App.Infrastructure.Configuration;
 using App.Infrastructure.FileSystem;
 using App.Infrastructure.Iis;
 using App.Infrastructure.Svn;
+using App.Domain.Interfaces;
+using App.Infrastructure.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,13 +24,17 @@ public static class DependencyInjection
 	/// </summary>
 	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddSingleton<IAppConfigProvider, JsonAppConfigProvider>();
+		services.AddDbContext<AppDbContext>(options =>
+			options.UseSqlite(configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
+
+		services.AddScoped<IAppConfigProvider, DbAppConfigProvider>();
 		services.AddSingleton<IDirectoryDeployer, FileSystemDirectoryDeployer>();
 		services.AddSingleton<IIisSiteManager, IisSiteManager>();
 		services.AddSingleton<ISvnLogProvider, SharpSvnLogProvider>();
 		services.AddSingleton<ISvnWorkingCopyUpdater, SharpSvnWorkingCopyUpdater>();
 		services.AddSingleton<ISvnWorkingCopyInfoProvider, SharpSvnWorkingCopyInfoProvider>();
 		services.AddSingleton<IIisStatusProvider, IisStatusProvider>();
+		services.AddScoped<ISiteDeployRepository, SiteDeployRepository>();
 
 		return services;
 	}

@@ -7,6 +7,6 @@ namespace App.Application.Deployments.GetIisStatus.Responses;
 /// <summary>
 /// Resposta da consulta de status IIS.
 /// </summary>
-public sealed record GetIisStatusResponse(IReadOnlyList<SiteStatus> Items);
+public sealed record GetIisStatusResponse(IisStatus Status);
 
 #endregion

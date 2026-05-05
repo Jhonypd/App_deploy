@@ -12,7 +12,7 @@ public interface IAppConfigProvider
 	/// <summary>
 	/// Carrega a configuração de deployment.
 	/// </summary>
-	AppConfigRoot Load();
+	Task<AppConfigRoot> LoadAsync();
 
 	#endregion
 }

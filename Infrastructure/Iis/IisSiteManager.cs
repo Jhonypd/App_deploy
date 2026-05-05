@@ -109,6 +109,69 @@ public sealed class IisSiteManager : IIisSiteManager
 			Console.WriteLine($"Site {site} iniciado novamente.");
 		}
 	}
+	/// <summary>
+	/// Cria ou atualiza as configurações de um site no IIS associando seu caminho físico.
+	/// </summary>
+	public void CriarOuAtualizarSite(string nomeSite, string caminhoFisico)
+	{
+		if (string.IsNullOrWhiteSpace(nomeSite)) throw new ArgumentException("Nome do site não pode ser vazio.", nameof(nomeSite));
+		if (string.IsNullOrWhiteSpace(caminhoFisico)) throw new ArgumentException("Caminho físico não pode ser vazio.", nameof(caminhoFisico));
+
+		using var manager = new ServerManager();
+
+		var appPoolName = $"{nomeSite}AppPool";
+		var appPool = manager.ApplicationPools.FirstOrDefault(p => string.Equals(p.Name, appPoolName, StringComparison.OrdinalIgnoreCase));
+
+		if (appPool == null)
+		{
+			Console.WriteLine($"Criando novo AppPool {appPoolName}");
+			appPool = manager.ApplicationPools.Add(appPoolName);
+		}
+
+		var site = manager.Sites.FirstOrDefault(s => string.Equals(s.Name, nomeSite, StringComparison.OrdinalIgnoreCase));
+
+		if (site == null)
+		{
+			Console.WriteLine($"Criando novo site IIS {nomeSite}");
+			// Criar com binding padrao porta temporaria aleatoria gerando no default (*:porta:)
+			site = manager.Sites.Add(nomeSite, caminhoFisico, 80);
+			site.Applications[0].ApplicationPoolName = appPoolName;
+		}
+		else
+		{
+			Console.WriteLine($"Atualizando caminho físico do site {nomeSite}");
+			var rootApp = site.Applications["/"];
+			if (rootApp != null)
+			{
+				var vdir = rootApp.VirtualDirectories["/"];
+				if (vdir != null)
+				{
+					vdir.PhysicalPath = caminhoFisico;
+				}
+				rootApp.ApplicationPoolName = appPoolName;
+			}
+		}
+
+		manager.CommitChanges();
+	}
+
+	/// <summary>
+	/// Deleta um site do IIS baseado em seu nome.
+	/// </summary>
+	public void RemoverSite(string nomeSite)
+	{
+		if (string.IsNullOrWhiteSpace(nomeSite)) return;
+
+		using var manager = new ServerManager();
+		var site = manager.Sites.FirstOrDefault(s => string.Equals(s.Name, nomeSite, StringComparison.OrdinalIgnoreCase));
+
+		if (site != null)
+		{
+			Console.WriteLine($"Removendo site IIS {nomeSite}");
+			manager.Sites.Remove(site);
+			manager.CommitChanges();
+		}
+	}
 	#endregion
 
 	#region Private Methods

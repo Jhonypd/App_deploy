@@ -22,14 +22,24 @@ public sealed class DeploymentItem
 	public string Svn { get; set; } = string.Empty;
 
 	/// <summary>
-	/// Lista de origens de arquivos a serem copiadas.
-	/// </summary>
-	public List<DeploymentOrigin> Origins { get; init; } = new();
-
-	/// <summary>
 	/// Caminho de destino final do deployment.
 	/// </summary>
 	public string Destino { get; init; } = string.Empty;
+
+	/// <summary>
+	/// Indica se a configuração já foi atualizada.
+	/// </summary>
+	public bool Atualizada { get; init; }
+
+	/// <summary>
+	/// URL manual associada ao deployment.
+	/// </summary>
+	public string? UrlManual { get; init; }
+
+	/// <summary>
+	/// Lista de origens de arquivos a serem copiadas.
+	/// </summary>
+	public List<DeploymentOrigin> Origins { get; init; } = new();
 	#endregion
 }
 

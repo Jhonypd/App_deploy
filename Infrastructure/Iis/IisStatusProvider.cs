@@ -14,7 +14,7 @@ public sealed class IisStatusProvider : IIisStatusProvider
 	/// <summary>
 	/// Obtém o status de sites e pools configurados no IIS local.
 	/// </summary>
-	public IReadOnlyList<SiteStatus> GetStatus()
+	public IisStatus GetStatus()
 	{
 		using var manager = new ServerManager();
 		var result = new List<SiteStatus>();
@@ -82,7 +82,7 @@ public sealed class IisStatusProvider : IIisStatusProvider
 			result.Add(status);
 		}
 
-		return result;
+		return new IisStatus { Sites = result };
 	}
 
 	#endregion

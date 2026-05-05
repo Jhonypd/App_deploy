@@ -34,7 +34,7 @@ public sealed class GetSvnCommitsHandler : IQueryHandler<GetSvnCommitsQuery, Get
 	/// </summary>
 	public GetSvnCommitsResponse Handle(GetSvnCommitsQuery query)
 	{
-		var selected = _service.FindDeploymentById(query.Id);
+		var selected = _service.FindDeploymentByIdAsync(query.Id).GetAwaiter().GetResult();
 		if (selected is null)
 		{
 			return new GetSvnCommitsResponse(Found: false, Items: Array.Empty<SvnCommitSummary>());

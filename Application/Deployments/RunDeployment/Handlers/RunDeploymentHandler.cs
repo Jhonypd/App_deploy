@@ -34,7 +34,7 @@ public sealed class RunDeploymentHandler : ICommandHandler<RunDeploymentCommand,
 	/// </summary>
 	public RunDeploymentResponse Handle(RunDeploymentCommand command)
 	{
-		var selected = _service.FindDeploymentById(command.Id);
+		var selected = _service.FindDeploymentByIdAsync(command.Id).GetAwaiter().GetResult();
 		if (selected is null)
 		{
 			return new RunDeploymentResponse(Found: false, Started: false);

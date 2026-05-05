@@ -1,3 +1,5 @@
+using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -25,6 +27,13 @@ public static class SwaggerConfig
                 Title = "App-deploy API",
                 Version = "v1"
             });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                o.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+            }
 
             // API Key via header Authorization (Bearer)
             o.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme

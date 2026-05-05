@@ -45,22 +45,24 @@ public sealed class DeploymentOrchestratorService
 	/// <summary>
 	/// Retorna todos os itens de deployment definidos na configuração.
 	/// </summary>
-	public IReadOnlyList<DeploymentItem> GetAllDeployments()
+	public async Task<IReadOnlyList<DeploymentItem>> GetAllDeploymentsAsync()
 	{
-		return _configProvider.Load().Deployments;
+		var config = await _configProvider.LoadAsync();
+		return config.Deployments;
 	}
 
 	/// <summary>
 	/// Busca um item de deployment pelo identificador.
 	/// </summary>
-	public DeploymentItem? FindDeploymentById(string id)
+	public async Task<DeploymentItem?> FindDeploymentByIdAsync(string id)
 	{
 		if (string.IsNullOrWhiteSpace(id))
 		{
 			return null;
 		}
 
-		return GetAllDeployments().FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase));
+		var items = await GetAllDeploymentsAsync();
+		return items.FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase));
 	}
 
 	/// <summary>

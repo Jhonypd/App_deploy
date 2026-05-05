@@ -34,7 +34,7 @@ public sealed class UpdateSvnRevisionHandler : ICommandHandler<UpdateSvnRevision
     /// </summary>
     public UpdateSvnRevisionResponse Handle(UpdateSvnRevisionCommand command)
     {
-        var selected = _service.FindDeploymentById(command.Id);
+        var selected = _service.FindDeploymentByIdAsync(command.Id).GetAwaiter().GetResult();
         if (selected is null)
         {
             return new UpdateSvnRevisionResponse(Found: false, Updated: false, SvnPath: string.Empty, Revision: command.Revision);
