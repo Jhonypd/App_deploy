@@ -6,6 +6,7 @@ namespace App.Application.Deployments.SaveSiteDeploy.Requests;
 public class SalvarSiteDeployRequest
 {
     public string ProjetoIis { get; set; } = string.Empty;
+    public int Porta { get; set; } = 80;
     public string? Svn { get; set; }
     public string Destino { get; set; } = string.Empty;
     public string? UrlManual { get; set; }

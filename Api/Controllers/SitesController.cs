@@ -1,17 +1,17 @@
 using App.Application.Messaging;
-using App.Application.Deployments.GetAllDeployments.Queries;
-using App.Application.Deployments.GetAllDeployments.Responses;
 using App.Application.Deployments.GetIisStatus.Queries;
 using App.Application.Deployments.GetIisStatus.Responses;
 using App.Application.Deployments.GetSvnCommits.Queries;
 using App.Application.Deployments.GetSvnCommits.Responses;
 using App.Application.Deployments.RunDeployment.Commands;
 using App.Application.Deployments.RunDeployment.Responses;
+using App.Application.Deployments.SaveSiteDeploy.Queries;
+using App.Application.Deployments.SaveSiteDeploy.Responses;
 using App.Application.Deployments.UpdateSvnRevision.Commands;
 using App.Application.Deployments.UpdateSvnRevision.Responses;
-using App.Api.Dtos.Deployments.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using App.Api.Dtos.Deployments.Responses;
 
 namespace App.Api.Controllers;
 
@@ -23,7 +23,7 @@ namespace App.Api.Controllers;
 public sealed class SitesController : ControllerBase
 {
     #region Fields
-    private readonly IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse> _getAllDeployments;
+    private readonly IQueryHandler<ObterSitesDeployQuery, Task<List<SiteDeployResponse>>> _obterSitesDeploy;
     private readonly ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> _runDeployment;
     private readonly IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> _svnCommits;
     private readonly IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> _iisStatus;
@@ -35,13 +35,13 @@ public sealed class SitesController : ControllerBase
     /// Inicializa as dependências de casos de uso do controlador.
     /// </summary>
     public SitesController(
-        IQueryHandler<GetAllDeploymentsQuery, GetAllDeploymentsResponse> getAllDeployments,
+        IQueryHandler<ObterSitesDeployQuery, Task<List<SiteDeployResponse>>> obterSitesDeploy,
         ICommandHandler<RunDeploymentCommand, RunDeploymentResponse> runDeployment,
         IQueryHandler<GetSvnCommitsQuery, GetSvnCommitsResponse> svnCommits,
         IQueryHandler<GetIisStatusQuery, GetIisStatusResponse> iisStatus,
         ICommandHandler<UpdateSvnRevisionCommand, UpdateSvnRevisionResponse> svnUpdate)
     {
-        _getAllDeployments = getAllDeployments;
+        _obterSitesDeploy = obterSitesDeploy;
         _runDeployment = runDeployment;
         _svnCommits = svnCommits;
         _iisStatus = iisStatus;
@@ -51,23 +51,38 @@ public sealed class SitesController : ControllerBase
 
     #region Endpoints
     /// <summary>
-    /// Lista todos os deployments configurados para execução.
+    /// Lista os sites cadastrados, cruzando com o que existe no IIS.
     /// </summary>
     [HttpGet("listar")]
-    public IActionResult GetAllDeployments()
+    public async Task<IActionResult> GetAllDeployments(
+        [FromQuery(Name = "importadoIis")] bool? importadoIis = null,
+        [FromQuery(Name = "atualizada")] bool? atualizada = null)
     {
-        var response = _getAllDeployments.Handle(new GetAllDeploymentsQuery());
+        var response = await _obterSitesDeploy.Handle(new ObterSitesDeployQuery());
+        var iisSiteNames = _iisStatus.Handle(new GetIisStatusQuery()).Status.Sites
+            .Select(s => NormalizeName(s.Nome))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var list = response.Items
-            .Select(d => new DeploymentDto
+        var list = response
+            .Select(d => new SiteListItemDto
             {
                 Id = d.Id,
-                NomeSite = d.NomeSite,
+                ProjetoIis = d.ProjetoIis,
+                Porta = d.Porta,
                 Svn = d.Svn,
                 Destino = d.Destino,
-                Origins = d.Origins.Select(o => new OriginDto { Path = o.Path, Conteudo = o.Conteudo }).ToList(),
-                Atualizada = d.Atualizada
+                UrlManual = d.UrlManual,
+                Atualizada = d.Atualizada,
+                ImportadoIis = iisSiteNames.Contains(NormalizeName(d.ProjetoIis)),
+                Origens = d.Origens.Select(o => new SiteListOriginDto
+                {
+                    Id = o.Id,
+                    Path = o.Path,
+                    Conteudo = o.Conteudo
+                }).ToList()
             })
+            .Where(item => !importadoIis.HasValue || item.ImportadoIis == importadoIis.Value)
+            .Where(item => !atualizada.HasValue || item.Atualizada == atualizada.Value)
             .ToList();
 
         return ApiResponseFactory.Ok(HttpContext, list);
@@ -204,6 +219,14 @@ public sealed class SitesController : ControllerBase
         }
 
         return ApiResponseFactory.Ok(HttpContext, new { ok = response.Updated, id, revision, svn = response.SvnPath });
+    }
+
+    /// <summary>
+    /// Normaliza o nome do site para comparação com o IIS.
+    /// </summary>
+    private static string NormalizeName(string? name)
+    {
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
     }
     #endregion
 }

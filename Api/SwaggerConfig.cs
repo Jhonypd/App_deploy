@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
-namespace App.Api.Configurations;
+namespace App.Api;
 
 /// <summary>
 /// Extensões de configuração do Swagger para a API.
@@ -74,7 +74,7 @@ public static class SwaggerConfig
 
         app.UseSwaggerUI(o =>
         {
-            o.SwaggerEndpoint("/swagger/v1/swagger.json", "App-deploy API v1");
+            o.SwaggerEndpoint("/swagger/v1/swagger.json", "Gerenciador de aplicações v1");
         });
 
         return app;

@@ -29,6 +29,7 @@ public class CriarSiteDeployHandler : ICommandHandler<CriarSiteDeployCommand, Ta
         {
             Id = entityId,
             ProjetoIis = req.ProjetoIis,
+            Porta = req.Porta,
             Svn = req.Svn,
             Destino = req.Destino,
             UrlManual = req.UrlManual,
@@ -48,6 +49,7 @@ public class CriarSiteDeployHandler : ICommandHandler<CriarSiteDeployCommand, Ta
         {
             Id = Guid.Parse(entity.Id),
             ProjetoIis = entity.ProjetoIis,
+            Porta = entity.Porta,
             Svn = entity.Svn,
             Destino = entity.Destino,
             UrlManual = entity.UrlManual,

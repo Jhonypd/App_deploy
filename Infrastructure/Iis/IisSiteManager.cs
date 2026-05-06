@@ -1,5 +1,6 @@
 using App.Application.Interfaces;
 using Microsoft.Web.Administration;
+using System.IO;
 
 namespace App.Infrastructure.Iis;
 
@@ -112,10 +113,11 @@ public sealed class IisSiteManager : IIisSiteManager
 	/// <summary>
 	/// Cria ou atualiza as configurações de um site no IIS associando seu caminho físico.
 	/// </summary>
-	public void CriarOuAtualizarSite(string nomeSite, string caminhoFisico)
+	public void CriarOuAtualizarSite(string nomeSite, string caminhoFisico, int porta = 80)
 	{
 		if (string.IsNullOrWhiteSpace(nomeSite)) throw new ArgumentException("Nome do site não pode ser vazio.", nameof(nomeSite));
 		if (string.IsNullOrWhiteSpace(caminhoFisico)) throw new ArgumentException("Caminho físico não pode ser vazio.", nameof(caminhoFisico));
+		if (porta <= 0 || porta > 65535) throw new ArgumentException("Porta deve estar entre 1 e 65535.", nameof(porta));
 
 		using var manager = new ServerManager();
 
@@ -133,8 +135,8 @@ public sealed class IisSiteManager : IIisSiteManager
 		if (site == null)
 		{
 			Console.WriteLine($"Criando novo site IIS {nomeSite}");
-			// Criar com binding padrao porta temporaria aleatoria gerando no default (*:porta:)
-			site = manager.Sites.Add(nomeSite, caminhoFisico, 80);
+			// Criar com binding na porta especificada
+			site = manager.Sites.Add(nomeSite, caminhoFisico, porta);
 			site.Applications[0].ApplicationPoolName = appPoolName;
 		}
 		else
@@ -150,9 +152,27 @@ public sealed class IisSiteManager : IIisSiteManager
 				}
 				rootApp.ApplicationPoolName = appPoolName;
 			}
+			// Atualizar porta se houver bindings
+			var binding = site.Bindings.FirstOrDefault(b => b.Protocol == "http");
+			if (binding != null)
+			{
+				binding.BindingInformation = $"*:{porta}:";
+			}
 		}
 
 		manager.CommitChanges();
+	}
+
+	/// <summary>
+	/// Cria o diretório de destino se não existir.
+	/// </summary>
+	public void CriarDiretorioSeNaoExistir(string caminho)
+	{
+		if (!string.IsNullOrWhiteSpace(caminho) && !Directory.Exists(caminho))
+		{
+			Console.WriteLine($"Criando diretório: {caminho}");
+			Directory.CreateDirectory(caminho);
+		}
 	}
 
 	/// <summary>

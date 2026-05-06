@@ -38,6 +38,10 @@ namespace App.Infrastructure.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("projeto_iis");
 
+                    b.Property<int>("Porta")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("porta");
+
                     b.Property<string>("Svn")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT")

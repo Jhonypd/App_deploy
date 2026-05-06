@@ -28,6 +28,7 @@ public class AtualizarSiteDeployHandler : ICommandHandler<AtualizarSiteDeployCom
         if (entity == null) throw new InvalidOperationException("SiteDeployConfig não encontrado.");
 
         entity.ProjetoIis = req.ProjetoIis;
+        entity.Porta = req.Porta;
         entity.Svn = req.Svn;
         entity.Destino = req.Destino;
         entity.UrlManual = req.UrlManual;
@@ -51,6 +52,7 @@ public class AtualizarSiteDeployHandler : ICommandHandler<AtualizarSiteDeployCom
         {
             Id = Guid.Parse(entity.Id),
             ProjetoIis = entity.ProjetoIis,
+            Porta = entity.Porta,
             Svn = entity.Svn,
             Destino = entity.Destino,
             UrlManual = entity.UrlManual,

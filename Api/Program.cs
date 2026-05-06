@@ -1,5 +1,4 @@
 ﻿using App.Api;
-using App.Api.Configurations;
 using App.Application;
 using App.Infrastructure;
 using App.Infrastructure.Data;
@@ -102,8 +101,12 @@ public static class Program
                         "http://192.168.0.224:7077",
                         "http://192.168.0.196:7077",
                         "http://localhost:7077",
+                        "http://localhost:7777",
+                        "http://localhost",
                         "http://127.0.0.1:5055",
-                        "http://localhost:5055")
+                        "http://localhost:5055",
+                        "http://127.0.0.1:5056",
+                        "http://localhost:5056")
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             });

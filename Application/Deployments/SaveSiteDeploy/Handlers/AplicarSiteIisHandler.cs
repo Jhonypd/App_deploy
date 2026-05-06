@@ -23,7 +23,8 @@ public class AplicarSiteIisHandler : ICommandHandler<AplicarSiteIisCommand, Task
         var config = await _repository.ObterPorId(command.Id);
         if (config == null) throw new InvalidOperationException("SiteDeployConfig não encontrado.");
 
-        _iisManager.CriarOuAtualizarSite(config.ProjetoIis, config.Destino);
+        _iisManager.CriarDiretorioSeNaoExistir(config.Destino);
+        _iisManager.CriarOuAtualizarSite(config.ProjetoIis, config.Destino, config.Porta);
 
         return true;
     }

@@ -20,12 +20,17 @@ public interface IIisSiteManager
 	/// <summary>
 	/// Cria ou atualiza as configurações de um site no IIS.
 	/// </summary>
-	void CriarOuAtualizarSite(string nomeSite, string caminhoFisico);
+	void CriarOuAtualizarSite(string nomeSite, string caminhoFisico, int porta = 80);
 
 	/// <summary>
 	/// Remove um site do IIS, se existir.
 	/// </summary>
 	void RemoverSite(string nomeSite);
+
+	/// <summary>
+	/// Cria o diretório de destino se não existir.
+	/// </summary>
+	void CriarDiretorioSeNaoExistir(string caminho);
 
 	#endregion
 }

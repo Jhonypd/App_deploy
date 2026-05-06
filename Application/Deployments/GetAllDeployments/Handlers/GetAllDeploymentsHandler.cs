@@ -33,11 +33,11 @@ public sealed class GetAllDeploymentsHandler : IQueryHandler<GetAllDeploymentsQu
 	public GetAllDeploymentsResponse Handle(GetAllDeploymentsQuery query)
 	{
 		var iisSiteNames = _iisStatusProvider.GetStatus().Sites
-			.Select(s => s.Nome)
+			.Select(s => NormalizeSiteName(s.Nome))
 			.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
 		var items = _service.GetAllDeploymentsAsync().GetAwaiter().GetResult()
-			.Where(d => iisSiteNames.Contains(d.NomeSite))
+			.Where(d => iisSiteNames.Contains(NormalizeSiteName(d.NomeSite)))
 			.Select(BuildDeploymentSummary)
 			.ToList();
 
@@ -74,6 +74,14 @@ public sealed class GetAllDeploymentsHandler : IQueryHandler<GetAllDeploymentsQu
 			deployment.Destino,
 			deployment.Origins.Select(o => new OriginSummary(o.Path, o.Conteudo)).ToList(),
 			isUpdated);
+	}
+
+	/// <summary>
+	/// Normaliza o nome do site para comparação com o IIS.
+	/// </summary>
+	private static string NormalizeSiteName(string? name)
+	{
+		return string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
 	}
 	#endregion
 }

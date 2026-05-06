@@ -1,4 +1,4 @@
-﻿namespace App.Application;
+﻿namespace App.Application.Deployments.GetIisStatus.Responses;
 
 public sealed class IisStatus
 {

@@ -2,7 +2,7 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App-deploy", "App-deploy.csproj", "{FD231E27-3DF0-5312-A5E3-8EDFF5FD04E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App.Api", "Api\App.Api.csproj", "{FD231E27-3DF0-5312-A5E3-8EDFF5FD04E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App.Domain", "Domain\App.Domain.csproj", "{C1114DC7-6C23-4294-BCBF-18C8E8273FB0}"
 EndProject

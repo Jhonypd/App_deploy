@@ -23,6 +23,11 @@ public class SiteDeployConfigMapping : IEntityTypeConfiguration<SiteDeployConfig
             .HasColumnType("TEXT")
             .HasMaxLength(255);
 
+        builder.Property(s => s.Porta)
+            .IsRequired()
+            .HasColumnName("porta")
+            .HasColumnType("INTEGER");
+
         builder.Property(s => s.Svn)
             .HasColumnName("svn")
             .HasColumnType("TEXT")
