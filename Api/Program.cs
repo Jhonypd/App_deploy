@@ -34,7 +34,7 @@ public static class Program
         ConfigureServices(builder, apiOptions);
 
         var app = builder.Build();
-        ApplyDatabaseMigrations(app);
+        // ApplyDatabaseMigrations(app);  // ← Removido - migrations agora são manuais
         ValidateApiOptions(apiOptions);
 
         ConfigurePipeline(app);
@@ -76,16 +76,6 @@ public static class Program
 
         ConfigureCors(builder.Services);
         builder.Services.AddSwaggerConfig();
-    }
-
-    /// <summary>
-    /// Garante que o banco SQLite esteja com o schema criado antes da API atender requisições.
-    /// </summary>
-    private static void ApplyDatabaseMigrations(WebApplication app)
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.Migrate();
     }
 
     /// <summary>
